@@ -18,6 +18,9 @@ end
 class ViewComponent::TestCase
   include Rails.application.routes.url_helpers
   include ViewComponent::TestHelpers
+
+  private :test_error_path if method_defined?(:test_error_path)
+  private :test_error_url if method_defined?(:test_error_url)
 end
 
 module ActionDispatch

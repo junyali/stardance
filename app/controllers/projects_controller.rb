@@ -46,6 +46,10 @@ class ProjectsController < ApplicationController
       @posts = @posts.reject { |post| post.postable_type == "Post::ShipEvent" && post.postable.certification_status != "approved" }
     end
 
+    @show_project_onboarding = @is_member && @posts.empty?
+    @show_hackatime_onboarding = @show_project_onboarding && current_user && current_user.hackatime_identity.blank?
+    @project_onboarding_mission = @project.current_mission
+
     if current_user
       devlog_ids = @posts.select { |p| p.postable_type == "Post::Devlog" }.map(&:postable_id)
       @liked_devlog_ids = Like.where(user: current_user, likeable_type: "Post::Devlog", likeable_id: devlog_ids).pluck(:likeable_id).to_set

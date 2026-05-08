@@ -27,7 +27,7 @@
       </p>
 
       <% if devlog? && postable.respond_to?(:duration_seconds) && postable.duration_seconds.present? %>
-        <p class="feed-post-card__duration"><%= format_seconds(postable.duration_seconds) %> logged</p>
+        <p class="feed-post-card__duration"><%= helpers.format_seconds(postable.duration_seconds) %> logged</p>
       <% end %>
     </div>
   </header>

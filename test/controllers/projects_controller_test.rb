@@ -11,7 +11,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   test "owner sees inline project editing form on show" do
     sign_in @owner
 
-    get project_path(@project)
+    get project_path(@project, editing: true)
 
     assert_response :success
     assert_select "form.project-show--editing[action=?]", project_path(@project)
@@ -51,6 +51,82 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "form.project-show--editing", 0
     assert_select ".project-show__title", text: "Forest Odyssey"
+  end
+
+  test "owner of empty project sees onboarding and github card" do
+    sign_in @owner
+
+    get project_path(@project)
+
+    assert_response :success
+    assert_select ".project-show__onboarding"
+    assert_select "#project-show-onboarding-title", text: "Welcome to your new project!"
+    assert_select "a[href='#{guide_path(:github_repository)}']", text: /Create your GitHub repository/
+  end
+
+  test "owner without hackatime identity sees hackatime setup card" do
+    sign_in @owner
+
+    get project_path(@project)
+
+    assert_response :success
+    assert_select ".project-show__onboarding form[action='/auth/hackatime'][method='post']"
+    assert_select ".project-show__onboarding", text: /Set up hour tracking with Hackatime/
+  end
+
+  test "owner with hackatime identity does not see hackatime setup card" do
+    User::Identity.insert_all([
+      {
+        user_id: @owner.id,
+        provider: "hackatime",
+        uid: "hackatime-owner",
+        created_at: Time.current,
+        updated_at: Time.current
+      }
+    ])
+    sign_in @owner
+
+    get project_path(@project)
+
+    assert_response :success
+    assert_select ".project-show__onboarding"
+    assert_select ".project-show__onboarding", { text: /Set up hour tracking with Hackatime/, count: 0 }
+    assert_select ".project-show__onboarding form[action='/auth/hackatime']", 0
+  end
+
+  test "project with attached mission shows gold mission onboarding card" do
+    mission = Mission.create!(
+      slug: "rusty-frontend",
+      name: "Rusty Frontend",
+      description: "Learn the basics of Rust while building frontend for a simple website."
+    )
+    @project.mission_attachments.create!(mission: mission)
+    sign_in @owner
+
+    get project_path(@project)
+
+    assert_response :success
+    assert_select ".project-show__onboarding-card--mission[href='#{mission_path(mission.slug)}']", text: /Rusty Frontend/
+  end
+
+  test "non-owner does not see owner onboarding" do
+    sign_in @viewer
+
+    get project_path(@project)
+
+    assert_response :success
+    assert_select ".project-show__onboarding", 0
+  end
+
+  test "project with existing post does not show onboarding block" do
+    fire_event = Post::FireEvent.create!(body: "This project is already active.")
+    Post.create!(project: @project, user: @owner, postable: fire_event)
+    sign_in @owner
+
+    get project_path(@project)
+
+    assert_response :success
+    assert_select ".project-show__onboarding", 0
   end
 
   test "non-owner cannot update project" do
