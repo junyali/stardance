@@ -9,8 +9,8 @@
 #   end
 
 user = User.find_or_create_by!(email: "kartikey@hackclub.com", slack_id: "U05F4B48GBF")
-user.make_super_admin!
-user.make_admin!
+user.grant_role!(:super_admin)
+user.grant_role!(:admin)
 
 # ---------------------------------------------------------------------------
 # Seed missions

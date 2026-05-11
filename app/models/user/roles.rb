@@ -6,10 +6,6 @@ module User::Roles
       define_method "#{role_name}?" do
         has_role?(role_name)
       end
-
-      define_method "make_#{role_name}!" do
-        grant_role!(role_name)
-      end
     end
   end
 
