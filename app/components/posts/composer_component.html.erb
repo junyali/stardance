@@ -7,8 +7,9 @@
             class: class_names("feed-composer__chip", "feed-composer__chip--active": selected),
             aria: (selected ? { current: "true" } : {}) %>
     <% end %>
-
-    <%= link_to "new project +", new_project_path, class: "feed-composer__chip feed-composer__chip--new" %>
+    <% if enabled? %>
+      <%= link_to "new project +", new_project_path, class: "feed-composer__chip feed-composer__chip--new" %>
+    <% end %>
   </div>
 
   <% if enabled? %>
