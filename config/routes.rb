@@ -704,6 +704,8 @@ Rails.application.routes.draw do
         post :restore
       end
     end
+
+    get 'review', to: 'reviews#index'
   end
 
   get "queue", to: "queue#index"
