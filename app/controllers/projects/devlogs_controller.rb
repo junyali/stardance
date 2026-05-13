@@ -1,15 +1,8 @@
 class Projects::DevlogsController < ApplicationController
   before_action :set_project
   before_action :set_devlog, only: %i[edit update destroy versions]
-  before_action :require_hackatime_project, only: %i[new create]
-  before_action :sync_hackatime_projects, only: %i[new create]
-  before_action :load_preview_time, only: %i[new]
-  before_action :require_preview_time, only: %i[new]
-
-  def new
-    authorize @project, :create_devlog?
-    @devlog = Post::Devlog.new
-  end
+  before_action :require_hackatime_project, only: %i[create]
+  before_action :sync_hackatime_projects, only: %i[create]
 
   def create
     authorize @project, :create_devlog?
@@ -46,8 +39,8 @@ class Projects::DevlogsController < ApplicationController
 
         return redirect_to project_path(@project)
       else
-        flash.now[:alert] = @devlog.errors.full_messages.to_sentence
-        render :new, status: :unprocessable_entity
+        redirect_back fallback_location: home_path(project_id: @project.id),
+                      alert: @devlog.errors.full_messages.to_sentence
       end
     end
   end
@@ -146,7 +139,6 @@ class Projects::DevlogsController < ApplicationController
                       .postable
   end
 
-
   def require_hackatime_project
     unless @project.hackatime_keys.present?
       redirect_to project_path(@project), alert: "You must link at least one Hackatime project before posting a devlog" and return
@@ -159,18 +151,6 @@ class Projects::DevlogsController < ApplicationController
 
     owner.try_sync_hackatime_data!
     @project.reload
-  end
-
-  def require_preview_time
-    unless @preview_time.present?
-      @retry_count = (params[:retry] || 0).to_i
-      if @retry_count < 3
-        @show_loading = true
-        render :loading and return
-      else
-        redirect_to project_path(@project), alert: "Could not fetch your coding time from Hackatime after multiple attempts. Please ensure Hackatime is tracking your project." and return
-      end
-    end
   end
 
   def devlog_params

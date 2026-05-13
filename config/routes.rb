@@ -190,7 +190,6 @@
 #                                         membership DELETE /memberships/:id(.:format)                                                                        projects/memberships#destroy
 #                            versions_project_devlog GET    /projects/:project_id/devlogs/:id/versions(.:format)                                              projects/devlogs#versions
 #                                    project_devlogs POST   /projects/:project_id/devlogs(.:format)                                                           projects/devlogs#create
-#                                 new_project_devlog GET    /projects/:project_id/devlogs/new(.:format)                                                       projects/devlogs#new
 #                                edit_project_devlog GET    /projects/:project_id/devlogs/:id/edit(.:format)                                                  projects/devlogs#edit
 #                                     project_devlog PATCH  /projects/:project_id/devlogs/:id(.:format)                                                       projects/devlogs#update
 #                                                    PUT    /projects/:project_id/devlogs/:id(.:format)                                                       projects/devlogs#update
@@ -712,7 +711,7 @@ Rails.application.routes.draw do
   # show/new/edit/update/destroy and the nested resources are exposed here.
   resources :projects, shallow: true, except: [ :index ] do
     resources :memberships, only: [ :create, :destroy ], module: :projects
-    resources :devlogs, only: %i[new create edit update destroy], module: :projects, shallow: false do
+    resources :devlogs, only: %i[create edit update destroy], module: :projects, shallow: false do
       member do
         get :versions
       end
