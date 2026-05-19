@@ -169,9 +169,6 @@ application.register("tutorial-video-modal", TutorialVideoModalController);
 import UploadFormController from "./upload_form_controller";
 application.register("upload-form", UploadFormController);
 
-import UserRefModalController from "./user_ref_modal_controller";
-application.register("user-ref-modal", UserRefModalController);
-
 import VimeoPlayerController from "./vimeo_player_controller";
 application.register("vimeo-player", VimeoPlayerController);
 

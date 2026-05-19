@@ -397,9 +397,7 @@ Rails.application.routes.draw do
   # get "marketing", to: "landing#marketing"
 
   # RSVPs
-  resources :rsvps, only: [ :create ] do
-    patch :user_ref, on: :collection
-  end
+  resources :rsvps, only: [ :create ]
   get "rsvps/confirm/:token", to: "rsvps#confirm", as: :confirm_rsvp
   get "tic_tac", to: "rsvps#tic_tac", as: :tic_tac, defaults: { format: :text }
 
