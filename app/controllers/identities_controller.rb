@@ -1,9 +1,6 @@
 class IdentitiesController < ApplicationController
   def hackatime
-    unless current_user
-      redirect_to root_path, alert: "Please log in first."
-      return
-    end
+    authorize :identity
 
     auth = request.env["omniauth.auth"]
     access_token = auth&.credentials&.token.to_s

@@ -5,7 +5,6 @@ class Onboarding::WizardController < ApplicationController
   before_action :require_teen_attestation!, only: %i[experience submit_experience experience_result
                                                      interests submit_interests interests_result
                                                      name submit_name]
-  before_action :require_signed_in!,        only: :complete
 
   def start
     if current_user.present?
@@ -114,6 +113,8 @@ class Onboarding::WizardController < ApplicationController
   end
 
   def complete
+    authorize :onboarding
+
     @display_name = current_user.display_name
   end
 
@@ -126,11 +127,6 @@ class Onboarding::WizardController < ApplicationController
   def require_signup_email!
     return if signup_session.email.present?
     redirect_to root_path, alert: "Please start signup from the homepage."
-  end
-
-  def require_signed_in!
-    return if current_user.present?
-    redirect_to root_path
   end
 
   def finalize_signup

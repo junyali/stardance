@@ -31,14 +31,14 @@ class UsersController < ApplicationController
 
   def followers
     @user = User.find(params[:id])
-    authorize @user, :followers?
+    authorize @user
     @followers = @user.followers.order(:display_name)
     render layout: false
   end
 
   def following
     @user = User.find(params[:id])
-    authorize @user, :following?
+    authorize @user
     @following = @user.following.order(:display_name)
     render layout: false
   end
@@ -47,7 +47,7 @@ class UsersController < ApplicationController
 
   def load_profile(active_tab)
     @user = User.includes(:preference).find(params[:id])
-    authorize @user, :show?
+    authorize @user
 
     @body_class = "app-layout-page"
     @active_tab = active_tab
@@ -63,12 +63,12 @@ class UsersController < ApplicationController
                     .order(created_at: :desc)
                     .preload(:project, :user, postable: [ { attachments_attachments: :blob } ])
 
-    unless current_user&.admin?
+    unless policy(@user).view_unapproved_ship_events?
       approved_ship_event_ids = Post::ShipEvent.where(certification_status: "approved").pluck(:id)
       @activity = @activity.where("postable_type != 'Post::ShipEvent' OR postable_id IN (?)", approved_ship_event_ids.presence || [ 0 ])
     end
 
-    unless current_user&.can_see_deleted_devlogs?
+    unless policy(@user).view_deleted_devlogs?
       deleted_devlog_ids = Post::Devlog.unscoped.deleted.pluck(:id)
       @activity = @activity.where.not(postable_type: "Post::Devlog", postable_id: deleted_devlog_ids)
     end

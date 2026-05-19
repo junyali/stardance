@@ -55,7 +55,7 @@ class ProjectsController < ApplicationController
                .select { |post| post.postable.present? }
     }
 
-    @posts = if current_user&.can_see_deleted_devlogs?
+    @posts = if policy(@project).view_deleted_devlogs?
       Post::Devlog.unscoped { load_posts.call }
     else
       load_posts.call
@@ -230,19 +230,8 @@ class ProjectsController < ApplicationController
   end
 
   def mark_fire
-    authorize :admin, :manage_projects?
-
     return render(json: { message: "Project not found" }, status: :not_found) unless @project
-
-    if @project.users.include?(current_user)
-      return render(json: { message: "You cannot mark your own project as a Super Star." }, status: :forbidden)
-    end
-
-    if current_user.fraud_dept? && !current_user.admin?
-      if @project.users.any? { |u| u.fraud_dept? }
-        return render(json: { message: "You cannot mark a fellow fraud department member's project as a Super Star." }, status: :forbidden)
-      end
-    end
+    authorize @project
 
     PaperTrail.request(whodunnit: current_user.id) do
       fire_event = Post::FireEvent.create(
@@ -291,9 +280,8 @@ class ProjectsController < ApplicationController
   end
 
   def unmark_fire
-    authorize :admin, :manage_projects?
-
     return render(json: { message: "Project not found" }, status: :not_found) unless @project
+    authorize @project
 
     PaperTrail.request(whodunnit: current_user.id) do
       @project.unmark_fire!
@@ -313,10 +301,8 @@ class ProjectsController < ApplicationController
   end
 
   def follow
-    return redirect_to(project_path(params[:id]), alert: "Please sign in first.") unless current_user
-
     @project = Project.find(params[:id])
-    authorize @project, :show?
+    authorize @project, :follow?
 
     follow = current_user.project_follows.build(project: @project)
     if follow.save
@@ -341,10 +327,8 @@ class ProjectsController < ApplicationController
   end
 
   def unfollow
-    return redirect_to(project_path(params[:id]), alert: "Please sign in first.") unless current_user
-
     @project = Project.find(params[:id])
-    authorize @project, :show?
+    authorize @project, :follow?
 
     follow = current_user.project_follows.find_by(project: @project)
     if follow&.destroy

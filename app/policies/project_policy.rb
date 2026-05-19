@@ -27,12 +27,32 @@ class ProjectPolicy < ApplicationPolicy
         user&.admin? || user&.has_role?(:fraud_dept)
     end
 
+    def mark_fire?
+        return false unless user&.admin? || user&.has_role?(:fraud_dept)
+        return false if record.users.exists?(id: user.id)
+        return false if user.has_role?(:fraud_dept) && !user.admin? && record.users.any?(&:fraud_dept?)
+
+        true
+    end
+
+    def unmark_fire?
+        user&.admin? || user&.has_role?(:fraud_dept)
+    end
+
     def ship?
         member?
     end
 
     def submit_ship?
         member? && user&.eligible_for_shop?
+    end
+
+    def follow?
+        signed_in_any? && show?
+    end
+
+    def view_deleted_devlogs?
+        user&.can_see_deleted_devlogs?
     end
 
     def see_votes?

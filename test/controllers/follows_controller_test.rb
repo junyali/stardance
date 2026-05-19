@@ -30,8 +30,8 @@ class FollowsControllerTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
-  test "redirects logged-out users" do
+  test "rejects logged-out users via policy" do
     post user_follow_path(@bob)
-    assert_redirected_to root_path
+    assert_response :forbidden
   end
 end

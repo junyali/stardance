@@ -6,13 +6,7 @@ class MissionSubmissionsController < ApplicationController
   def index
     authorize Mission::Submission
 
-    scope = Mission::Submission.includes(:mission, ship_event: { post: [ :user, :project ] })
-
-    # Restrict scope based on role.
-    unless current_user.admin? || current_user.has_role?(:helper) || current_user.has_role?(:mission_reviewer)
-      mission_ids = current_user.mission_memberships.pluck(:mission_id)
-      scope = scope.where(mission_id: mission_ids)
-    end
+    scope = policy_scope(Mission::Submission).includes(:mission, ship_event: { post: [ :user, :project ] })
 
     if params[:status].present? && Mission::Submission.aasm.states.map(&:name).map(&:to_s).include?(params[:status])
       scope = scope.where(status: params[:status])
@@ -33,7 +27,7 @@ class MissionSubmissionsController < ApplicationController
   end
 
   def approve
-    authorize @submission, :approve?
+    authorize @submission
     Mission::Submission.transaction do
       @submission.update!(reviewed_by: current_user, reviewed_at: Time.current)
       @submission.approve!
@@ -45,7 +39,7 @@ class MissionSubmissionsController < ApplicationController
   end
 
   def reject
-    authorize @submission, :reject?
+    authorize @submission
     message = params[:rejection_message].to_s.strip
     return redirect_to(@submission, alert: "Provide a rejection reason.") if message.blank?
 
@@ -57,7 +51,7 @@ class MissionSubmissionsController < ApplicationController
   end
 
   def undo
-    authorize @submission, :undo?
+    authorize @submission
     @submission.update!(reviewed_by: nil, reviewed_at: nil, rejection_message: nil)
     @submission.undo!
     track_funnel("mission_submission_undone")
@@ -65,7 +59,7 @@ class MissionSubmissionsController < ApplicationController
   end
 
   def redeem
-    authorize @submission, :redeem?
+    authorize @submission
     @prizes = @submission.mission.prizes.ordered.includes(:shop_item).to_a
   end
 
