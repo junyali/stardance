@@ -43,6 +43,9 @@ application.register("file-upload", FileUploadController);
 import FlashController from "./flash_controller";
 application.register("flash", FlashController);
 
+import FormSubmitOnceController from "./form_submit_once_controller";
+application.register("form-submit-once", FormSubmitOnceController);
+
 import HackatimeLinkController from "./hackatime_link_controller";
 application.register("hackatime-link", HackatimeLinkController);
 
@@ -66,6 +69,12 @@ application.register("markdown-preview", MarkdownPreviewController);
 
 import ModalController from "./modal_controller";
 application.register("modal", ModalController);
+
+import OnboardingInterestsController from "./onboarding_interests_controller";
+application.register("onboarding-interests", OnboardingInterestsController);
+
+import OnboardingTransitionController from "./onboarding_transition_controller";
+application.register("onboarding-transition", OnboardingTransitionController);
 
 import OrderFormController from "./order_form_controller";
 application.register("order-form", OrderFormController);
@@ -123,6 +132,12 @@ application.register("sidebar-active", SidebarActiveController);
 
 import SuperMegaFunnelController from "./super_mega_funnel_controller";
 application.register("super-mega-funnel", SuperMegaFunnelController);
+
+import CountUpController from "./count_up_controller";
+application.register("count-up", CountUpController);
+
+import UpgradeModalController from "./upgrade_modal_controller";
+application.register("upgrade-modal", UpgradeModalController);
 
 import Tilt3dController from "./tilt_3d_controller";
 application.register("tilt-3d", Tilt3dController);

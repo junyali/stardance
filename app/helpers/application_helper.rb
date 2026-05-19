@@ -3,6 +3,20 @@ module ApplicationHelper
     image_tag "icons/stardust.png", alt: "Stardust", class: [ "currency-icon", extra_class ].compact.join(" ")
   end
 
+  def hack_club_auth_path(login_hint: nil)
+    if login_hint.present?
+      "/auth/hack_club?login_hint=#{CGI.escape(login_hint.to_s)}"
+    else
+      "/auth/hack_club"
+    end
+  end
+
+  def onboarding_count_up(n)
+    content_tag(:span, number_with_delimiter(n),
+      class: "onboarding-counter",
+      data: { controller: "count-up", count_up_target_value: n })
+  end
+
   def admin_tool(&block)
     if current_user&.admin?
       content_tag(:div, class: "admin tools-do", &block)

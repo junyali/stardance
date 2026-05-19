@@ -49,6 +49,7 @@
 @use "components/mission_panel";
 @use "components/status_pill";
 @use "components/feed";
+@use "components/onboarding";
 
 @use "components/vimeo_embed";
 @use "components/command_palette";
@@ -57,6 +58,7 @@
 @use "themes/christmas";
 
 // Pages
+@use "pages/onboarding" as onboarding_pages;
 @use "pages/projects/new";
 @use "pages/projects/show";
 @use "pages/projects/ship";

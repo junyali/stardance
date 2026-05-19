@@ -542,6 +542,23 @@ Rails.application.routes.draw do
     end
   end
 
+  namespace :onboarding do
+    post :start,                     to: "wizard#start"
+    get  :welcome,                   to: "wizard#welcome"
+    get  :birthday,                  to: "wizard#birthday"
+    post :birthday,                  to: "wizard#submit_birthday"
+    get  :age_gate,                  to: "wizard#age_gate"
+    get  :experience,                to: "wizard#experience"
+    post :experience,                to: "wizard#submit_experience"
+    get  :experience_result,         to: "wizard#experience_result"
+    get  :interests,                 to: "wizard#interests"
+    post :interests,                 to: "wizard#submit_interests"
+    get  :interests_result,          to: "wizard#interests_result"
+    get  :name,                      to: "wizard#name"
+    post :name,                      to: "wizard#submit_name"
+    get  :complete,                  to: "wizard#complete"
+  end
+
   namespace :helper, constraints: HelperConstraint do
     root to: "application#index"
     resources :users, only: [ :index, :show ] do

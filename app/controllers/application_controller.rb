@@ -105,6 +105,16 @@ class ApplicationController < ActionController::Base
   end
 
   def user_not_authorized(exception)
+    if current_user&.guest?
+      session[:return_to] = request.fullpath if request.get?
+      respond_to do |format|
+        format.turbo_stream { render "onboarding/upgrade_prompt", status: :forbidden }
+        format.html { render "onboarding/upgrade_prompt", status: :forbidden, layout: "application" }
+        format.json { render json: { error: "Sign in with Hack Club to do that." }, status: :forbidden }
+      end
+      return
+    end
+
     @error_title = "Whoa there, explorer!"
     @error_message = exception.message.presence || "You don't have the right ingredients to access this page."
     @back_path = safe_referrer
