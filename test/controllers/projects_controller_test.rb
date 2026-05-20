@@ -3,6 +3,7 @@ require "test_helper"
 class ProjectsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @owner = User.create!(slack_id: "U_PROJECT_OWNER", display_name: "owner", email: "owner@example.test")
+    @owner.identities.create!(provider: "hack_club", uid: "hca_project_owner")
     @viewer = User.create!(slack_id: "U_PROJECT_VIEWER", display_name: "viewer", email: "viewer@example.test")
     @project = Project.create!(title: "Forest Odyssey", description: "Explore a magical forest")
     @project.memberships.create!(user: @owner, role: :owner)
