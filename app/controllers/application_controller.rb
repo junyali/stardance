@@ -106,7 +106,7 @@ class ApplicationController < ActionController::Base
 
   def user_not_authorized(exception)
     if current_user.nil?
-      session[:return_to] = request.fullpath if request.get?
+      store_return_to
       respond_to do |format|
         format.html { redirect_to root_path, alert: "Please sign in to continue." }
         format.json { render json: { error: "You must be signed in to do that." }, status: :unauthorized }
@@ -115,7 +115,7 @@ class ApplicationController < ActionController::Base
     end
 
     if current_user.guest?
-      session[:return_to] = request.fullpath if request.get?
+      store_return_to
       respond_to do |format|
         format.turbo_stream { render "onboarding/upgrade_prompt", status: :forbidden }
         format.html { render "onboarding/upgrade_prompt", status: :forbidden, layout: "application" }
@@ -132,6 +132,14 @@ class ApplicationController < ActionController::Base
       format.html { render "errors/not_authorized", status: :forbidden }
       format.json { render json: { error: @error_message }, status: :forbidden }
     end
+  end
+
+  # Skip oversized fullpaths so the cookie session can't overflow on long URLs.
+  def store_return_to
+    return unless request.get?
+    return if request.fullpath.bytesize > 1000
+
+    session[:return_to] = request.fullpath
   end
 
   def safe_referrer
