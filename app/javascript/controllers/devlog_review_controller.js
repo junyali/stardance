@@ -38,7 +38,7 @@ export default class extends Controller {
   };
 
   connect() {
-    console.log(`DevlogReview #${this.idValue} controller connected!`);
+    //console.log(`DevlogReview #${this.idValue} controller connected!`);
 
     // Debounce timers
     this.minutesDebounceTimer = null;
@@ -70,7 +70,7 @@ export default class extends Controller {
 
     // Debounce for 500ms
     this.minutesDebounceTimer = setTimeout(() => {
-      console.log(`DevlogReview #${this.idValue}: Updating minutes to ${minutes}`);
+     // console.log(`DevlogReview #${this.idValue}: Updating minutes to ${minutes}`);
       this.sendUpdate({ approved_minutes: minutes });
     }, 500);
   }
@@ -84,7 +84,7 @@ export default class extends Controller {
       return;
     }
 
-    console.log(`DevlogReview #${this.idValue}: Approving with ${minutes} minutes`);
+   // console.log(`DevlogReview #${this.idValue}: Approving with ${minutes} minutes`);
     this.sendUpdate({
       status: "approved",
       approved_minutes: minutes
@@ -93,7 +93,7 @@ export default class extends Controller {
 
   // Reject the devlog
   reject() {
-    console.log(`DevlogReview #${this.idValue}: Rejecting`);
+    //console.log(`DevlogReview #${this.idValue}: Rejecting`);
     this.sendUpdate({
       status: "rejected",
       approved_minutes: 0
@@ -109,7 +109,7 @@ export default class extends Controller {
 
     // Debounce for 1000ms (longer for text input)
     this.notesDebounceTimer = setTimeout(() => {
-      console.log(`DevlogReview #${this.idValue}: Updating notes`);
+      //console.log(`DevlogReview #${this.idValue}: Updating notes`);
       this.sendUpdate({ justification: notes });
     }, 1000);
   }
@@ -141,7 +141,7 @@ export default class extends Controller {
         return;
     }
 
-    console.log(`DevlogReview #${this.idValue}: Quick adjust ${action} - ${currentMinutes} → ${newMinutes} minutes`);
+    //console.log(`DevlogReview #${this.idValue}: Quick adjust ${action} - ${currentMinutes} → ${newMinutes} minutes`);
 
     // Update the input field
     this.minutesInputTarget.value = newMinutes;
@@ -168,7 +168,7 @@ export default class extends Controller {
       const result = await response.json();
 
       if (result.success) {
-        console.log(`DevlogReview #${this.idValue}: Update successful`, result.devlog_review);
+        //console.log(`DevlogReview #${this.idValue}: Update successful`, result.devlog_review);
 
         // Update visual state if status changed
         if (data.status) {
@@ -202,16 +202,16 @@ export default class extends Controller {
       case "approved":
         this.panelTarget.classList.add("approved");
         this.approveButtonTarget.classList.add("active");
-        console.log(`DevlogReview #${this.idValue}: Visual state → approved (light green)`);
+        //console.log(`DevlogReview #${this.idValue}: Visual state → approved (light green)`);
         break;
       case "rejected":
         this.panelTarget.classList.add("rejected");
         this.rejectButtonTarget.classList.add("active");
-        console.log(`DevlogReview #${this.idValue}: Visual state → rejected (light red)`);
+        //console.log(`DevlogReview #${this.idValue}: Visual state → rejected (light red)`);
         break;
       case "pending":
         this.panelTarget.classList.add("pending");
-        console.log(`DevlogReview #${this.idValue}: Visual state → pending`);
+        //console.log(`DevlogReview #${this.idValue}: Visual state → pending`);
         break;
     }
   }
