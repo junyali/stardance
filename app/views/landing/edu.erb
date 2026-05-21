@@ -1,0 +1,258 @@
+<% content_for :title, "Educator Toolkit" %>
+<% content_for :og_description, "Resources for teachers to share the Stardance STEM Challenge with their classrooms — free posters, logo, FAQ, and a 2-minute classroom video." %>
+<% content_for :twitter_card, "summary_large_image" %>
+
+<%= content_for :stylesheets do %>
+  <%= stylesheet_link_tag "landing", "data-turbo-track": "reload" %>
+<% end %>
+
+<% poster_request_url = "https://forms.hackclub.com/t/k4g4nCuSbLus" %>
+<% patch_request_url  = "https://forms.hackclub.com/t/g7PK8MCKgbus" %>
+<% artemis_patch_image_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Artemis_II_patch.png/960px-Artemis_II_patch.png" %>
+
+<div class="educator-toolkit">
+  <%= render "landing/sections/header" %>
+
+  <section class="educator-toolkit__hero">
+    <div class="educator-toolkit__hero-copy">
+      <h1 class="educator-toolkit__title">
+        Educator <span class="educator-toolkit__title--italic">Toolkit</span>
+      </h1>
+      <p class="educator-toolkit__subtitle">
+        Everything you need to spread the word about Stardance Challenge.
+        Show the video, get free posters, and request an Artemis mission patch.
+      </p>
+      <div class="educator-toolkit__nasa-attribution">
+        <p class="educator-toolkit__nasa-attribution-label">Featured on NASA.gov</p>
+        <div class="educator-toolkit__nasa-attribution-links">
+          <a href="https://www.nasa.gov/learning-resources/space-out-this-summer-with-variety-of-nasa-stem-activities/" target="_blank" rel="noopener">Space Out This Summer &rarr;</a>
+          <a href="https://www.nasa.gov/stem-content/hack-club-stardance-challenge/" target="_blank" rel="noopener">Hack Club Stardance Challenge &rarr;</a>
+        </div>
+      </div>
+      <p class="educator-toolkit__teen-cta">
+        Stardance meets with <a href="https://csteachers.org" target="_blank" rel="noopener"><abbr title="Computer Science Teachers Association">CSTA</abbr></a> standards and guidelines.
+      </p>
+      <p class="educator-toolkit__teen-cta">
+        Teen? <a href="https://stardance.hackclub.com/edu-return">Head here instead &rarr;</a>
+      </p>
+    </div>
+    <div class="educator-toolkit__hero-patch" aria-hidden="true">
+      <div class="educator-toolkit__hero-patch-frame">
+        <%= image_tag artemis_patch_image_url,
+                      alt: "",
+                      class: "educator-toolkit__hero-patch-image",
+                      loading: "eager" %>
+        <div class="educator-toolkit__hero-patch-group">
+          <%= image_tag image_url("landing/hero/star-character.png"),
+                        alt: "",
+                        aria_hidden: "true",
+                        class: "educator-toolkit__hero-patch-mascot" %>
+          <p class="educator-toolkit__hero-patch-note">
+            Get this patch free for showing the video to your classroom!
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="educator-toolkit__resources">
+    <div class="educator-toolkit__resource-layout">
+      <div class="educator-toolkit__resource educator-toolkit__resource--featured educator-toolkit__resource--video">
+        <div class="educator-toolkit__video-wrapper">
+          <iframe
+            src="https://player.vimeo.com/video/1188569982?autoplay=0&muted=0&loop=0&playsinline=1&controls=1&dnt=1"
+            frameborder="0"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowfullscreen
+            title="Stardance overview video">
+          </iframe>
+        </div>
+        <div class="educator-toolkit__resource-body">
+          <h3 class="educator-toolkit__resource-title">Show the 2&#8209;minute classroom video</h3>
+          <p class="educator-toolkit__resource-meta">
+            Play this quick overview in class so students know what Stardance is
+            and how they can join.
+          </p>
+        </div>
+      </div>
+
+      <a class="educator-toolkit__resource educator-toolkit__resource--featured educator-toolkit__resource--patch"
+         href="<%= patch_request_url %>"
+         target="_blank"
+         rel="noopener">
+        <%= image_tag artemis_patch_image_url,
+                      alt: "",
+                      class: "educator-toolkit__resource-patch-image",
+                      loading: "lazy" %>
+        <div class="educator-toolkit__resource-body">
+          <h3 class="educator-toolkit__resource-title">Request your Artemis II mission patch</h3>
+          <p class="educator-toolkit__resource-meta">A sewn Artemis II mission patch, mailed to educators who show the video.</p>
+        </div>
+        <span class="educator-toolkit__patch-cta">
+          <div>Request patch &rarr;</div>
+        </span>
+      </a>
+    </div>
+
+    <div class="educator-toolkit__resource-extras">
+      <p class="educator-toolkit__resource-extras-label">Also available for educators</p>
+      <div class="educator-toolkit__resource-extras-grid">
+        <a class="educator-toolkit__resource educator-toolkit__resource--compact"
+           href="<%= poster_request_url %>"
+           target="_blank"
+           rel="noopener">
+          <span class="educator-toolkit__resource-body">
+            <span class="educator-toolkit__resource-title">Free classroom posters</span>
+            <span class="educator-toolkit__resource-meta">Optional posters to help students remember where to sign up.</span>
+          </span>
+          <span class="educator-toolkit__resource-action">
+            Request posters <span aria-hidden="true">&rarr;</span>
+          </span>
+        </a>
+
+        <a class="educator-toolkit__resource educator-toolkit__resource--compact"
+           href="/downloads/branding-kit.zip"
+           download="branding-kit.zip">
+          <span class="educator-toolkit__resource-body">
+            <span class="educator-toolkit__resource-title">Printable branding kit</span>
+            <span class="educator-toolkit__resource-meta">Stardance logo and branding assets for print.</span>
+          </span>
+          <span class="educator-toolkit__resource-action">
+            Download Assets <span aria-hidden="true">&rarr;</span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="educator-toolkit__about">
+    <div class="educator-toolkit__about-grid">
+      <div class="educator-toolkit__about-card">
+        <h3 class="educator-toolkit__about-card-title">About Hack Club</h3>
+        <p class="educator-toolkit__about-card-body">
+          Founded in 2014, Hack Club is a 501(c)(3) nonprofit supporting a global network
+          of over 100,000 teenage makers. We believe the best way to learn is by building,
+          so we provide community, resources, and rewards to help teens create.
+        </p>
+      </div>
+
+      <div class="educator-toolkit__about-card">
+        <h3 class="educator-toolkit__about-card-title">About Stardance Challenge</h3>
+        <p class="educator-toolkit__about-card-body">
+          Developed in partnership with NASA, Stardance Challenge runs June&nbsp;1&nbsp;&ndash;
+          September&nbsp;30,&nbsp;2026. Students build any technical project and earn
+          tokens called <strong>stardust</strong> based on the quality of their work. They
+          can spend their stardust on real-world prizes like 3D printers, Raspberry Pis,
+          and even trips to the Kennedy Space Center. The better they build, the more they
+          earn.
+        </p>
+      </div>
+
+      <div class="educator-toolkit__about-card">
+        <h3 class="educator-toolkit__about-card-title">About NASA&rsquo;s Support</h3>
+        <p class="educator-toolkit__about-card-body">
+          NASA is strengthening its education programs to support high school and college
+          students in building the STEM skills they need to succeed in the workforces of
+          tomorrow. NASA and Hack Club signed a Space Act Agreement in March&nbsp;2026 to
+          support this Summer&nbsp;2026 challenge.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq-section" data-controller="faq-accordion">
+    <h2 class="faq-section__title">FAQ</h2>
+
+    <div class="faq-section__list">
+      <div class="faq-section__item" data-action="click->faq-accordion#toggle">
+        <span class="faq-section__number">1.</span>
+        <span class="faq-section__question">What do educators need to do?</span>
+        <span class="faq-section__arrow" data-faq-accordion-target="arrow">&#9654;</span>
+        <div class="faq-section__answer" data-faq-accordion-target="answer">
+          Show the 2-minute Stardance video to your students. After you share it,
+          request your free Artemis II mission patch from this page.
+        </div>
+      </div>
+
+      <div class="faq-section__item" data-action="click->faq-accordion#toggle">
+        <span class="faq-section__number">2.</span>
+        <span class="faq-section__question">How do I get the Artemis II mission patch?</span>
+        <span class="faq-section__arrow" data-faq-accordion-target="arrow">&#9654;</span>
+        <div class="faq-section__answer" data-faq-accordion-target="answer">
+          Use the patch request form after you show the classroom video. We&rsquo;ll mail
+          the sewn Artemis II mission patch as a thank-you for helping students
+          discover Stardance.
+        </div>
+      </div>
+
+      <div class="faq-section__item" data-action="click->faq-accordion#toggle">
+        <span class="faq-section__number">3.</span>
+        <span class="faq-section__question">Does it cost anything?</span>
+        <span class="faq-section__arrow" data-faq-accordion-target="arrow">&#9654;</span>
+        <div class="faq-section__answer" data-faq-accordion-target="answer">
+          No, it&rsquo;s completely free for educators and students.
+        </div>
+      </div>
+
+      <div class="faq-section__item" data-action="click->faq-accordion#toggle">
+        <span class="faq-section__number">4.</span>
+        <span class="faq-section__question">Do I need to run anything?</span>
+        <span class="faq-section__arrow" data-faq-accordion-target="arrow">&#9654;</span>
+        <div class="faq-section__answer" data-faq-accordion-target="answer">
+          No, students participate independently. You don&rsquo;t need to organize or
+          supervise anything &mdash; just show the video and spread the word.
+        </div>
+      </div>
+
+      <div class="faq-section__item" data-action="click->faq-accordion#toggle">
+        <span class="faq-section__number">5.</span>
+        <span class="faq-section__question">Is it open to beginners?</span>
+        <span class="faq-section__arrow" data-faq-accordion-target="arrow">&#9654;</span>
+        <div class="faq-section__answer" data-faq-accordion-target="answer">
+          Yup! We welcome both beginners and experts &mdash; there&rsquo;s no bar for entry
+          or competition to get the prizes. Plus, we have tutorials and guided projects so
+          anyone can get started making awesome websites, games, hardware, and more!
+        </div>
+      </div>
+
+      <div class="faq-section__item" data-action="click->faq-accordion#toggle">
+        <span class="faq-section__number">6.</span>
+        <span class="faq-section__question">What do students build?</span>
+        <span class="faq-section__arrow" data-faq-accordion-target="arrow">&#9654;</span>
+        <div class="faq-section__answer" data-faq-accordion-target="answer">
+          Anything technical &mdash; websites, games, apps, electronics, hardware, rockets.
+          Beginners and experienced builders are both welcome.
+        </div>
+      </div>
+
+      <div class="faq-section__item" data-action="click->faq-accordion#toggle">
+        <span class="faq-section__number">7.</span>
+        <span class="faq-section__question">What do they earn?</span>
+        <span class="faq-section__arrow" data-faq-accordion-target="arrow">&#9654;</span>
+        <div class="faq-section__answer" data-faq-accordion-target="answer">
+          Students earn tokens called <strong>stardust</strong> based on the quality of their work. They can spend their stardust on real-life rewards
+          like 3D printers, keyboards, and developer tools from the $2.5M prize pool.
+        </div>
+      </div>
+
+      <div class="faq-section__item" data-action="click->faq-accordion#toggle">
+        <span class="faq-section__number">8.</span>
+        <span class="faq-section__question">How does it actually work?</span>
+        <span class="faq-section__arrow" data-faq-accordion-target="arrow">&#9654;</span>
+        <div class="faq-section__answer" data-faq-accordion-target="answer">
+          Once we launch, students will be able to log into the platform to log their
+          projects. They&rsquo;ll do this by installing our
+          <a href="https://hackatime.hackclub.com" target="_blank" rel="noopener">Hackatime</a>
+          extension that keeps track of their time spent coding (or &lsquo;hacking&rsquo;).
+          Along the way, they&rsquo;ll post logs of their work to Stardance showing off their project.
+          Once they&rsquo;re ready, they&rsquo;ll &ldquo;ship&rdquo; their project by
+          publishing it so anyone can see it. From this, they&rsquo;ll earn
+          tokens called <strong>stardust</strong> based on the quality of their work, which they can spend in the shop for free prizes like
+          3D printers, electronics, plushies, and more!
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%= render "landing/sections/footer" %>
+</div>

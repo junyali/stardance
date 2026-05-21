@@ -1,0 +1,18 @@
+<header class="landing-header">
+  <%= link_to root_path do %>
+    <%= image_tag image_url("landing/header/stardance-logo.png"), loading: "eager", fetchpriority: "high", alt: "Stardance Challenge by Hack Club", class: "landing-header__logo" %>
+  <% end %>
+
+  <div class="landing-header__partners">
+    <span class="landing-header__partnership-text">in partnership with</span>
+    <span class="landing-header__nasa-text">NASA</span>
+    <%= image_tag image_url("landing/header/amd-logo.png"), loading: "eager", alt: "AMD", class: "landing-header__amd-logo" %>
+    <%= image_tag image_url("landing/header/github-logo.png"), loading: "eager", alt: "GitHub", class: "landing-header__github-logo" %>
+  </div>
+
+  <% unless current_user %>
+    <%= form_tag "/auth/hack_club", method: :post, data: { turbo: false }, class: "landing-header__login-form" do %>
+      <button type="submit" class="landing-header__login-btn">Log in</button>
+    <% end %>
+  <% end %>
+</header>

@@ -1,0 +1,43 @@
+<section class="gain-stardust">
+  <%= image_tag image_url("landing/how-this-works/colorful-streak.png"), class: "gain-stardust__streak", alt: "", aria: { hidden: true }, loading: "lazy" %>
+
+  <div class="gain-stardust__curve" aria-hidden="true" data-controller="curve-draw" data-curve-draw-start-after-value=".project-thumbs-section">
+    <svg class="gain-stardust__curve-svg" preserveAspectRatio="none" viewBox="0 0 373 648" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g transform="rotate(180 186.5 324) translate(0 648) scale(1 -1)">
+        <path data-curve-draw-target="path" d="M373 1C331.46 1.00026 216.087 23.3718 131.002 103.388C45.9172 183.405 -15.5311 286.056 4.96885 438.957C21.1537 559.674 94.5021 647 131.002 647" stroke="white" stroke-width="2" />
+      </g>
+    </svg>
+  </div>
+
+  <h2 class="gain-stardust__title">2. Gain stardust</h2>
+
+  <div class="gain-stardust__cards">
+    <div class="gain-stardust__card gain-stardust__card--peek gain-stardust__card--0" aria-hidden="true">
+      <div class="gain-stardust__card-image-wrap">
+        <%= image_tag image_url("landing/how-this-works/card-left-bg.png"), class: "gain-stardust__card-image gain-stardust__card-image--fill", alt: "" %>
+      </div>
+    </div>
+
+    <div class="gain-stardust__card gain-stardust__card--1">
+      <img src="<%= image_url("landing/how-this-works/sparkle.svg") %>" class="gain-stardust__card-sparkle gain-stardust__card-sparkle--left" aria-hidden="true" alt="">
+      <img src="<%= image_url("landing/how-this-works/sparkle.svg") %>" class="gain-stardust__card-sparkle gain-stardust__card-sparkle--right" aria-hidden="true" alt="">
+      <h3 class="gain-stardust__card-title">Publish projects</h3>
+      <p>Ship your project into the world for others to see! Anything open-source counts.</p>
+      <%= image_tag image_url("landing/how-this-works/card-star.png"), class: "gain-stardust__card-star gain-stardust__card-star--1", alt: "", aria: { hidden: true }, data: { controller: "falling-star", action: "click->falling-star#fall" } %>
+    </div>
+
+    <div class="gain-stardust__card gain-stardust__card--2">
+      <img src="<%= image_url("landing/how-this-works/sparkle.svg") %>" class="gain-stardust__card-sparkle gain-stardust__card-sparkle--left" aria-hidden="true" alt="">
+      <img src="<%= image_url("landing/how-this-works/sparkle.svg") %>" class="gain-stardust__card-sparkle gain-stardust__card-sparkle--right" aria-hidden="true" alt="">
+      <h3 class="gain-stardust__card-title">Get feedback</h3>
+      <p>Your project gets rated by other teens. The higher your rating, the more <strong>stardust</strong> you earn.</p>
+    </div>
+
+    <div class="gain-stardust__card gain-stardust__card--peek gain-stardust__card--3" aria-hidden="true">
+      <div class="gain-stardust__card-image-wrap">
+        <%= image_tag image_url("landing/how-this-works/card-right-bg.png"), class: "gain-stardust__card-image gain-stardust__card-image--crop", alt: "" %>
+      </div>
+      <%= image_tag image_url("landing/how-this-works/card-star.png"), class: "gain-stardust__card-star gain-stardust__card-star--3", alt: "" %>
+    </div>
+  </div>
+</section>

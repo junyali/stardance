@@ -1,0 +1,41 @@
+<footer class="landing-footer" data-controller="rocket-arc">
+  <div class="landing-footer__scene-block">
+    <div class="landing-footer__scene" aria-hidden="true">
+      <%= image_tag image_url("landing/footer/footer6.png"), loading: "lazy", alt: "", class: "landing-footer__scene-layer landing-footer__scene-layer--base" %>
+      <%= image_tag image_url("landing/footer/footer2.png"), loading: "lazy", alt: "", class: "landing-footer__scene-layer landing-footer__scene-layer--2" %>
+      <%# footer5 (rocket) removed from scene — now animated independently %>
+      <%= image_tag image_url("landing/footer/footer3.png"), loading: "lazy", alt: "", class: "landing-footer__scene-layer landing-footer__scene-layer--3" %>
+      <%= image_tag image_url("landing/footer/footer4.png"), loading: "lazy", alt: "", class: "landing-footer__scene-layer landing-footer__scene-layer--4", data: { rocket_arc_target: "star" } %>
+      <%= image_tag image_url("landing/footer/footer1.png"), loading: "lazy", alt: "", class: "landing-footer__scene-layer landing-footer__scene-layer--1", data: { rocket_arc_target: "star" } %>
+    </div>
+
+    <%= image_tag image_url("landing/footer/star-creature.png"), loading: "lazy", alt: "", aria_hidden: "true", class: "landing-footer__creature landing-footer__creature--right" %>
+
+    <%= image_tag image_url("landing/footer/footer5.png"), loading: "lazy", alt: "", aria_hidden: "true", class: "landing-footer__rocket", data: { rocket_arc_target: "rocket" } %>
+
+    <div class="landing-footer__content">
+    <div class="landing-footer__top-row">
+      <div class="landing-footer__logo-col">
+        <%= image_tag image_url("landing/header/stardance-logo.png"), loading: "lazy", alt: "Stardance", class: "landing-footer__logo" %>
+        <%= image_tag image_url("landing/footer/yellow-decoration.png"), loading: "lazy", alt: "", aria_hidden: "true", class: "landing-footer__creature landing-footer__creature--left" %>
+        <nav class="landing-footer__links" aria-label="Hack Club links">
+          <a href="https://hackclub.com">Hack Club</a>
+          <a href="https://hackclub.com/slack/">Slack</a>
+          <a href="https://hackclub.com/clubs/">Clubs</a>
+          <a href="https://hackathons.hackclub.com">Hackathons</a>
+        </nav>
+      </div>
+      <div class="landing-footer__text">
+        <p>Hack Club is a 501(c)(3) nonprofit and network of 100k+ technical high schoolers. We believe you learn best by building, so we're creating community and providing grants so you can make awesome projects. In the past few years, we've partnered with GitHub to run Summer of Making, hosted the world's longest hackathon on land, and ran Canada's largest high school hackathon.</p>
+        <p>At Hack Club, students aren't just learning, they're shipping.</p>
+        <p>Made with &#9829;&#xFE0E; by teenagers, for teenagers at Hack Club</p>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <div class="landing-footer__panels" aria-hidden="true">
+    <%= image_tag image_url("landing/footer/big-panel.png"), loading: "lazy", alt: "", class: "landing-footer__panel landing-footer__panel--big" %>
+    <%= image_tag image_url("landing/footer/small-panel.png"), loading: "lazy", alt: "", class: "landing-footer__panel landing-footer__panel--small" %>
+  </div>
+</footer>

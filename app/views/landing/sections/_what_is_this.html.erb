@@ -1,0 +1,34 @@
+<section class="what-is-this" data-controller="what-is-this">
+  <div class="what-is-this__divider" aria-hidden="true">
+    <span class="what-is-this__divider-line"></span>
+    <% 2.times do |i| %>
+      <svg class="what-is-this__divider-sparkle what-is-this__divider-sparkle--<%= i.zero? ? "left" : "right" %>" viewBox="206.75 4 28.5 38" xmlns="http://www.w3.org/2000/svg" focusable="false">
+        <path d="M219.878 4.56347C220.11 3.49747 221.63 3.49747 221.862 4.56347L224.565 16.998C224.635 17.3195 224.856 17.5872 225.159 17.7162L234.99 21.9063C235.813 22.257 235.813 23.4233 234.99 23.774L225.159 27.9642C224.856 28.0932 224.635 28.3609 224.565 28.6824L221.862 41.1169C221.63 42.1829 220.11 42.1829 219.878 41.1169L217.175 28.6824C217.105 28.3609 216.884 28.0932 216.581 27.9642L206.75 23.774C205.927 23.4233 205.927 22.257 206.75 21.9063L216.581 17.7162C216.884 17.5872 217.105 17.3195 217.175 16.998L219.878 4.56347Z" fill="#EEE7BB" />
+      </svg>
+    <% end %>
+  </div>
+  <%= image_tag image_url("landing/space/moon.png"), class: "what-is-this__moon", alt: "", aria: { hidden: true }, loading: "lazy" %>
+  <div class="what-is-this__card-stack">
+    <div class="what-is-this__border what-is-this__border--1">
+      <div class="what-is-this__border what-is-this__border--2">
+        <div class="what-is-this__border what-is-this__border--3">
+          <div class="what-is-this__border what-is-this__border--4">
+            <div class="what-is-this__inner">
+              <h2 class="what-is-this__title">What <span class="what-is-this__title--italic">is</span> this?</h2>
+              <div class="what-is-this__body">
+                <p>Stardance is a <strong>free online summer program</strong> for teens 13&ndash;18. Build any technical project you want &mdash; websites, games, apps, hardware &mdash; log your hours, and earn real prizes: Raspberry Pis, 3D printers, even a laptop. No experience needed &mdash; guides and a community of over 100,000 teens are there to help you get started.</p>
+                <p>It runs June 1 &ndash; September 30, with weekly drops, freebies, and AMAs with astronauts. Run by Hack Club, a nonprofit that&rsquo;s shipped 10,000+ prizes to teen makers in 119 countries.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="what-is-this__footnote">
+      Curious about Hack Club? Learn more about
+      <a href="https://hackclub.com/philanthropy/">our donors</a>
+      or
+      <a href="https://hackclub.com/">other programs</a>.
+    </p>
+  </div>
+</section>

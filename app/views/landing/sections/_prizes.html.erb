@@ -1,0 +1,44 @@
+<section class="prizes">
+  <div class="prizes__text">
+    <h2 class="prizes__title">3. Earn prizes!</h2>
+    <p class="prizes__subtitle">Spend your stardust in the shop and we&rsquo;ll ship prizes to you. Free for teens, funded by donations.</p>
+  </div>
+
+  <div class="prizes__bar">
+    <div data-controller="prize-float" class="prizes__item prizes__item--bambu">
+      <%= image_tag image_url("landing/prizes/bambu-a1m.png"), class: "prizes__item-img", alt: "Bambu Lab A1 mini 3D printer", loading: "lazy" %>
+      <%= image_tag image_url("landing/prizes/star-deco.png"), class: "prizes__item-star prizes__item-star--bambu", alt: "", aria: { hidden: true }, loading: "lazy" %>
+      <span class="prizes__label prizes__label--bambu">bambu a1 mini 3d printer</span>
+    </div>
+
+    <div data-controller="prize-float" class="prizes__item prizes__item--switch">
+      <%= image_tag image_url("landing/prizes/switch.png"), class: "prizes__item-img", alt: "Nintendo Switch", loading: "lazy" %>
+      <span class="prizes__label prizes__label--switch">nintendo switch</span>
+    </div>
+
+    <div data-controller="prize-float" class="prizes__item prizes__item--camera">
+      <%= image_tag image_url("landing/prizes/camera.png"), class: "prizes__item-img", alt: "Digital camera", loading: "lazy" %>
+      <span class="prizes__label prizes__label--camera">digital camera</span>
+    </div>
+
+    <div data-controller="prize-float" class="prizes__item prizes__item--airpods">
+      <%= image_tag image_url("landing/prizes/airpods.png"), class: "prizes__item-img", alt: "AirPods Pro", loading: "lazy" %>
+      <span class="prizes__label prizes__label--airpods">airpods pro</span>
+    </div>
+
+    <div data-controller="prize-float" class="prizes__item prizes__item--mouse">
+      <%= image_tag image_url("landing/prizes/mouse.png"), class: "prizes__item-img", alt: "Logitech MX Master 3S", loading: "lazy" %>
+      <span class="prizes__label prizes__label--mouse">mx master 3s mouse</span>
+    </div>
+
+    <div data-controller="prize-float" class="prizes__item prizes__item--kindle">
+      <%= image_tag image_url("landing/prizes/kindle.avif"), class: "prizes__item-img", alt: "Kindle Paperwhite", loading: "lazy" %>
+      <span class="prizes__label prizes__label--kindle">kindle paperwhite</span>
+    </div>
+
+    <div data-controller="prize-float" class="prizes__item prizes__item--ipad">
+      <%= image_tag image_url("landing/prizes/ipad.png"), class: "prizes__item-img", alt: "Apple iPad", loading: "lazy" %>
+      <span class="prizes__label prizes__label--ipad">apple ipad</span>
+    </div>
+  </div>
+</section>

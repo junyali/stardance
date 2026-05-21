@@ -1,0 +1,86 @@
+<div class="section hero" role="main" data-controller="parallax">
+  <%= image_tag image_url("landing/hero/earth.png"), class: "hero__earth", alt: "", data: { parallax_target: "layer", speed: "0.5" } %>
+  <%= image_tag image_url("landing/hero/moon.png"), class: "hero__moon", alt: "", data: { parallax_target: "layer", speed: "0.35" } %>
+
+  <div class="rsvp-container">
+    <p class="hero__eyebrow">By <%= link_to "Hack Club", "https://hackclub.com", target: "_blank", rel: "noopener" %>, for teens 13–18</p>
+    <h1 class="hero__headline">
+      <span>Make projects.</span>
+      <span>Get <span class="hero__headline--italic">prizes.</span></span>
+    </h1>
+    <p class="hero__subhead">The largest STEM event of the summer:<br>make anything you want and earn free prizes.
+      <br><br>
+      <% if Flipper.enabled?(:new_onboarding) %>
+        Enter your email to sign up and start your first project.
+      <% else %>
+        RSVP to get notified when we launch on <strong>June 1st</strong>.
+      <% end %></p>
+
+    <%= render "landing/sections/rsvp_form",
+               placeholder: "Enter your email...",
+               leading: image_tag(image_url("landing/hero/star-character.png"), class: "hero__doodle-arrow", alt: "", data: { controller: "falling-star", action: "pointerdown->falling-star#fall" }) do %>
+      <% unless Flipper.enabled?(:new_onboarding) %>
+        <%= turbo_stream_from "rsvp_counter" %>
+        <p class="hero__caption" data-controller="rsvp-counter" aria-live="polite">Join <%= render "landing/sections/rsvp_counter" %> others RSVP&rsquo;d!</p>
+      <% end %>
+      <% if Rails.env.development? && current_user.blank? %>
+        <%= button_to "dev login", dev_login_auto_path, method: :get, form_class: "hero__dev-login", class: "hero__dev-login-btn" %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="hero__nasa-photo" data-parallax-target="layer" data-speed="0.2">
+    <%= image_tag image_url("landing/hero/nasa-hero.png"), loading: "eager", fetchpriority: "high", alt: "NASA Orion spacecraft", class: "hero__nasa-photo-img" %>
+  </div>
+
+  <div class="hero__video" data-controller="tilt-3d vimeo-player" data-tilt-3d-max-value="9" data-action="click->vimeo-player#wrapperClick">
+    <iframe
+      data-vimeo-player-target="iframe"
+      src="https://player.vimeo.com/video/1188569982?autoplay=1&muted=1&loop=1&playsinline=1&controls=0&dnt=1"
+      frameborder="0"
+      allow="autoplay; fullscreen; picture-in-picture"
+      allowfullscreen
+      title="Stardance hero video"
+      aria-hidden="true"></iframe>
+    <%= image_tag image_url("landing/how-this-works/card-star.png"), class: "hero__video-star", alt: "", aria: { hidden: true }, data: { action: "click->vimeo-player#starClick" } %>
+
+    <div class="hero__video-unmute-prompt" aria-hidden="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M4 9v6h4l5 5V4L8 9H4z" />
+        <path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M16.5 9.5l5 5M21.5 9.5l-5 5" />
+      </svg>
+    </div>
+
+    <div class="hero__video-controls">
+      <button type="button" class="hero__video-btn" data-action="click->vimeo-player#togglePlay" aria-label="Play or pause hero video">
+        <svg class="hero__video-icon hero__video-icon--play" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M4 2.5v11l10-5.5z" /></svg>
+        <svg class="hero__video-icon hero__video-icon--pause" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M4 2.5h3v11H4zm5 0h3v11H9z" /></svg>
+      </button>
+      <input type="range" class="hero__video-scrub"
+             min="0" max="0" step="0.01" value="0"
+             autocomplete="off"
+             data-vimeo-player-target="scrub"
+             data-action="input->vimeo-player#scrubInput change->vimeo-player#scrubChange"
+             aria-label="Scrub hero video">
+      <button type="button" class="hero__video-btn" data-action="click->vimeo-player#toggleMute" aria-label="Mute or unmute hero video">
+        <svg class="hero__video-icon hero__video-icon--unmuted" viewBox="0 0 16 16" aria-hidden="true">
+          <path fill="currentColor" d="M3 6v4h2.5L9 13V3L5.5 6z" />
+          <path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M11 5.6a3.2 3.2 0 0 1 0 4.8M13 3.6a5.7 5.7 0 0 1 0 8.8" />
+        </svg>
+        <svg class="hero__video-icon hero__video-icon--muted" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M4 9v6h4l5 5V4L8 9H4z" />
+          <path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M16.5 9.5l5 5M21.5 9.5l-5 5" />
+        </svg>
+      </button>
+      <button type="button" class="hero__video-btn" data-action="click->vimeo-player#toggleFullscreen" aria-label="Enter or exit fullscreen">
+        <svg class="hero__video-icon hero__video-icon--enter-fs" viewBox="0 0 16 16" aria-hidden="true">
+          <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M2.5 6V2.5H6M14 6V2.5H10.5M2.5 10v3.5H6M14 10v3.5H10.5" />
+        </svg>
+        <svg class="hero__video-icon hero__video-icon--exit-fs" viewBox="0 0 16 16" aria-hidden="true">
+          <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M6 2.5V6H2.5M10 2.5V6h3.5M6 13.5V10H2.5M10 13.5V10h3.5" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+</div>

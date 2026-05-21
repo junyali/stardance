@@ -1,0 +1,56 @@
+<section class="done-before">
+  <div class="done-before__border done-before__border--top" aria-hidden="true">
+    <span class="done-before__border-line"></span>
+    <% 2.times do |i| %>
+      <svg class="done-before__border-sparkle done-before__border-sparkle--<%= i.zero? ? "left" : "right" %>" viewBox="206.75 4 28.5 38" xmlns="http://www.w3.org/2000/svg" focusable="false">
+        <path d="M219.878 4.56347C220.11 3.49747 221.63 3.49747 221.862 4.56347L224.565 16.998C224.635 17.3195 224.856 17.5872 225.159 17.7162L234.99 21.9063C235.813 22.257 235.813 23.4233 234.99 23.774L225.159 27.9642C224.856 28.0932 224.635 28.3609 224.565 28.6824L221.862 41.1169C221.63 42.1829 220.11 42.1829 219.878 41.1169L217.175 28.6824C217.105 28.3609 216.884 28.0932 216.581 27.9642L206.75 23.774C205.927 23.4233 205.927 22.257 206.75 21.9063L216.581 17.7162C216.884 17.5872 217.105 17.3195 217.175 16.998L219.878 4.56347Z" fill="#EEE7BB" />
+      </svg>
+    <% end %>
+  </div>
+
+  <%= image_tag image_url("landing/done-before/star-artwork.png"), class: "done-before__star-artwork", alt: "", aria: { hidden: true }, loading: "lazy" %>
+  <h2 class="done-before__title">Trusted by <span class="done-before__title--italic">hundreds</span> of schools and students.</h2>
+
+  <p class="done-before__subtitle">
+    Previously, we ran
+    <a href="https://highseas.hackclub.com/" class="done-before__link" target="_blank" rel="noopener">High Seas</a>,
+    <a href="https://summer.hackclub.com/" class="done-before__link" target="_blank" rel="noopener">Summer of Making</a>,
+    <a href="https://flavortown.hackclub.com/" class="done-before__link" target="_blank" rel="noopener">Flavortown</a>,
+    all with a similar model. Here&rsquo;s what happened.
+  </p>
+
+  <div class="done-before__cards">
+    <div class="done-before__card">
+      <img src="<%= image_url("landing/done-before/star-deco-card.svg") %>" class="done-before__card-star" aria-hidden="true" alt="">
+      <div class="done-before__card-box">
+        <span class="done-before__card-number">5,000+</span>
+        <span class="done-before__card-desc">high schoolers participated</span>
+      </div>
+    </div>
+
+    <div class="done-before__card">
+      <img src="<%= image_url("landing/done-before/star-deco-card-alt.svg") %>" class="done-before__card-star" aria-hidden="true" alt="">
+      <div class="done-before__card-box">
+        <span class="done-before__card-number">250,000+</span>
+        <span class="done-before__card-desc">hours of creative building submitted</span>
+      </div>
+    </div>
+
+    <div class="done-before__card">
+      <img src="<%= image_url("landing/done-before/star-deco-card.svg") %>" class="done-before__card-star" aria-hidden="true" alt="">
+      <div class="done-before__card-box">
+        <span class="done-before__card-number">10,000</span>
+        <span class="done-before__card-desc">prizes shipped to 119 countries &amp; 49 US states</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="done-before__border done-before__border--bottom" aria-hidden="true">
+    <span class="done-before__border-line"></span>
+    <% 2.times do |i| %>
+      <svg class="done-before__border-sparkle done-before__border-sparkle--<%= i.zero? ? "left" : "right" %>" viewBox="206.75 4 28.5 38" xmlns="http://www.w3.org/2000/svg" focusable="false">
+        <path d="M219.878 4.56347C220.11 3.49747 221.63 3.49747 221.862 4.56347L224.565 16.998C224.635 17.3195 224.856 17.5872 225.159 17.7162L234.99 21.9063C235.813 22.257 235.813 23.4233 234.99 23.774L225.159 27.9642C224.856 28.0932 224.635 28.3609 224.565 28.6824L221.862 41.1169C221.63 42.1829 220.11 42.1829 219.878 41.1169L217.175 28.6824C217.105 28.3609 216.884 28.0932 216.581 27.9642L206.75 23.774C205.927 23.4233 205.927 22.257 206.75 21.9063L216.581 17.7162C216.884 17.5872 217.105 17.3195 217.175 16.998L219.878 4.56347Z" fill="#EEE7BB" />
+      </svg>
+    <% end %>
+  </div>
+</section>
