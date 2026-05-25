@@ -1,7 +1,7 @@
 .shop-item-card {
-  background: #f8e8d1;
-  border-radius: 16px;
-  box-shadow: var(--shadow);
+  background: var(--color-space-card, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--color-space-border, rgba(255, 255, 255, 0.12));
+  border-radius: 14px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -11,12 +11,14 @@
   overflow: visible;
   height: 100%;
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    transform 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    border-color: var(--color-space-accent, var(--color-yellow-450));
+    background: var(--color-space-card-hover, rgba(255, 255, 255, 0.06));
   }
 
   &--out-of-stock {
@@ -47,7 +49,7 @@
 
   &__mission-requirement {
     font-size: 0.85rem;
-    color: var(--color-brown-700, #6b3a1a);
+    color: var(--color-space-text-muted, var(--color-space-text));
     background: var(--color-yellow-soft, rgba(251, 191, 36, 0.18));
     padding: 4px 8px;
     border-radius: 6px;
@@ -241,7 +243,7 @@
     top: 0.5rem;
     right: 0.5rem;
     z-index: 10;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.5);
     border: none;
     border-radius: 50%;
     width: 2.5rem;
@@ -251,12 +253,12 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
     svg {
       width: 1.4rem;
       height: 1.4rem;
-      color: #ccc;
+      color: rgba(255, 255, 255, 0.4);
       transition:
         color 0.2s ease,
         transform 0.2s ease;
@@ -264,7 +266,7 @@
 
     &:hover {
       transform: scale(1.1);
-      background: #fff;
+      background: rgba(0, 0, 0, 0.7);
 
       svg {
         color: #f59e0b;
@@ -272,7 +274,7 @@
     }
 
     &--active {
-      background: #fef3c7;
+      background: rgba(245, 158, 11, 0.2);
 
       svg {
         color: #f59e0b;
@@ -299,34 +301,23 @@
       text-decoration: none;
     }
   }
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: url("landing/hero/hero-bg.webp") repeat center center / 1200px;
-    z-index: 0;
-    border-radius: 16px;
-  }
 
   &__image {
     width: 100%;
-    height: 250px;
+    height: 180px;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    background-color: #e8cfb4;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
     position: relative;
 
     img {
       height: auto;
       max-height: 100%;
       max-width: 100%;
-      padding: 1em;
+      padding: 0.75em;
       position: relative;
       z-index: 0;
       opacity: 1 !important;
@@ -340,7 +331,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
+    border-radius: 10px;
     font-size: 3rem;
     z-index: 2;
     pointer-events: none;
@@ -354,7 +345,7 @@
     border-radius: 6px;
     font-family: var(--font-family-text);
     font-size: 0.78rem;
-    color: #92400e;
+    color: var(--color-space-text-muted, var(--color-space-text));
   }
 
   &__achievement-names {
@@ -388,7 +379,7 @@
   }
 
   &__hours {
-    color: #a87254;
+    color: var(--color-space-text-muted, rgba(255, 255, 255, 0.5));
     font-size: 0.8rem;
   }
 
@@ -399,12 +390,12 @@
   }
 
   &__price {
-    color: var(--color-brown-700);
+    color: var(--color-space-text);
     font-size: 1.2rem;
   }
 
   &__original-price {
-    color: #999;
+    color: rgba(255, 255, 255, 0.4);
     font-size: 1rem;
   }
 
@@ -417,20 +408,20 @@
       left: 0;
       right: 0;
       top: 50%;
-      border-top: 2px solid #999;
+      border-top: 2px solid rgba(255, 255, 255, 0.4);
     }
   }
 
   &__title {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     font-weight: bold;
-    color: #4d2b32;
+    color: var(--color-space-text);
     font-family: var(--font-family-subtitle);
   }
 
   &__description {
-    font-size: 1.2rem;
-    color: #a87254;
+    font-size: 0.95rem;
+    color: var(--color-space-text-muted, rgba(255, 255, 255, 0.6));
     font-family: var(--font-family-text);
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -441,7 +432,7 @@
 
   &__enabled-until {
     font-size: 0.8rem;
-    color: #a87254;
+    color: var(--color-space-text-muted, rgba(255, 255, 255, 0.5));
     font-style: italic;
   }
 

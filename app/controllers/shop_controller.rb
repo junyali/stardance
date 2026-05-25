@@ -197,8 +197,7 @@ class ShopController < ApplicationController
         @order = current_user.shop_orders.new(
           shop_item: @shop_item,
           quantity: @mission_submission ? 1 : quantity,
-          frozen_address: selected_address,
-          accessory_ids: @mission_submission ? [] : @accessories.pluck(:id)
+          frozen_address: selected_address
         )
         @order.redeeming_mission_submission = @mission_submission if @mission_submission
         @order.aasm_state = "pending" if @order.respond_to?(:aasm_state=)

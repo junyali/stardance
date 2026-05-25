@@ -79,16 +79,9 @@
             <%= form_with url: shop_order_path(shop_item_id: @shop_item.id), method: :post, local: true, id: "order-form" do |form| %>
                 <% if not @shop_item.one_per_person_ever %>
                     <div class="shop-order__quantity">
-                        <%= render InputComponent.new(
-                        label: "Quantity",
-                        placeholder: 1,
-                        form: form,
-                        attribute: :quantity,
-                        subtitle: "Maximum #{@shop_item.max_qty || 10} items per order",
-                        color: :red,
-                        as: :number_field,
-                        input_html: { min: 1, max: 10, step: 1, value: 1, id: "shop-order__quantity-input" }
-                        ) %>
+                        <label class="shop-order__quantity-label" for="shop-order__quantity-input">Quantity</label>
+                        <%= form.number_field :quantity, min: 1, max: @shop_item.max_qty || 10, step: 1, value: 1, id: "shop-order__quantity-input", class: "shop-order__quantity-field" %>
+                        <span class="shop-order__quantity-subtitle">Maximum <%= @shop_item.max_qty || 10 %> items per order</span>
                     </div>
                 <% else %>
                     <%= form.hidden_field :quantity, value: 1 %>
@@ -114,8 +107,7 @@
                                                     class="shop-order__accessory-option-input"
                                                     data-price="<%= accessory.price_for_region(@user_region) %>"
                                                     data-tag="<%= tag %>"
-                                                    form="order-form"
-                                                    style="display: none;">
+                                                    form="order-form">
                                                     <div class="shop-order__accessory-option-block<%= ' shop-order__accessory-option-block--with-image' if accessory.show_image_in_shop && accessory.image.attached? %>">
                                                     <% if accessory.show_image_in_shop && accessory.image.attached? %>
                                                      <%= image_tag accessory.image.variant(:carousel_sm), class: "shop-order__accessory-option-image", loading: "lazy" %>
@@ -144,8 +136,7 @@
                                                    name="accessory_ids[]"
                                                    value="<%= accessory.id %>"
                                                    class="shop-order__accessory-option-input"
-                                                   data-price="<%= accessory.price_for_region(@user_region) %>"
-                                                   style="display: none;">
+                                                   data-price="<%= accessory.price_for_region(@user_region) %>">
                                             <div class="shop-order__accessory-option-block shop-order__accessory-option-block--with-image">
                                                 <% if accessory.image.attached? %>
                                                     <%= image_tag accessory.image.variant(:carousel_sm), class: "shop-order__accessory-option-image", loading: "lazy" %>
@@ -200,44 +191,40 @@
                 <% end %>
             </div>
             <div class="shop-order__summary">
-                <%= render InputGroupComponent.new(
-                    label: "Order Summary",
-                    color: :green,
-                    subtitle: safe_join([ "Current Balance: ", stardust_icon, current_user.balance.to_s ]),
-                ) do %>
-                    <div class="shop-order__summary-content">
-                        <div class="shop-order__summary-price">
-                            <h4>Base Price:</h4>
-                            <% if @shop_item.on_sale? %>
-                                <h4>
-                                    <span class="shop-order__original-price"><%= stardust_icon %> <span class="shop-order__strikethrough"><%= @regional_base_price %></span></span>
-                                    <%= stardust_icon %> <%= @sale_price.round %>
-                                </h4>
-                            <% else %>
-                                <h4><%= stardust_icon %> <%= @regional_base_price %></h4>
-                            <% end %>
-                        </div>
-                        <div class="shop-order__summary-accessories-list" id="shop-order__summary-accessories-list" style="display: none;" data-order-form-target="accessoriesListContainer">
-                            <h4>Accessories:</h4>
-                            <ul id="shop-order__accessories-list-items" data-order-form-target="accessoriesListItems"></ul>
-                        </div>
-                        <div class="shop-order__summary-qty">
-                            <h4>Quantity:</h4>
-                            <h4 id="shop-order__summary-qty-display" data-order-form-target="summaryQtyDisplay">1x</h4>
-                        </div>
-                        <div class="shop-order__summary-total">
-                            <h4>Total:</h4>
-                            <h4 id="shop-order__summary-total-display" data-order-form-target="summaryTotalDisplay"><%= stardust_icon %> <%= @sale_price.round %></h4>
-                        </div>
+                <h3 class="shop-order__summary-heading">Order Summary</h3>
+                <p class="shop-order__summary-balance"><%= safe_join([ "Current Balance: ", stardust_icon, " ", current_user.balance.to_s ]) %></p>
+                <div class="shop-order__summary-content">
+                    <div class="shop-order__summary-price">
+                        <h4>Base Price:</h4>
+                        <% if @shop_item.on_sale? %>
+                            <h4>
+                                <span class="shop-order__original-price"><%= stardust_icon %> <span class="shop-order__strikethrough"><%= @regional_base_price %></span></span>
+                                <%= stardust_icon %> <%= @sale_price.round %>
+                            </h4>
+                        <% else %>
+                            <h4><%= stardust_icon %> <%= @regional_base_price %></h4>
+                        <% end %>
                     </div>
-                <% end %>
+                    <div class="shop-order__summary-accessories-list" id="shop-order__summary-accessories-list" style="display: none;" data-order-form-target="accessoriesListContainer">
+                        <h4>Accessories:</h4>
+                        <ul id="shop-order__accessories-list-items" data-order-form-target="accessoriesListItems"></ul>
+                    </div>
+                    <div class="shop-order__summary-qty">
+                        <h4>Quantity:</h4>
+                        <h4 id="shop-order__summary-qty-display" data-order-form-target="summaryQtyDisplay">1x</h4>
+                    </div>
+                    <div class="shop-order__summary-total">
+                        <h4>Total:</h4>
+                        <h4 id="shop-order__summary-total-display" data-order-form-target="summaryTotalDisplay"><%= stardust_icon %> <%= @sale_price.round %></h4>
+                    </div>
+                </div>
             </div>
             <% primary_address = current_user.addresses.find { |a| a["primary"] } || current_user.addresses.first %>
             <% has_phone = primary_address&.dig("phone_number").present? || Rails.env.development? || @shop_item.is_a?(ShopItem::FreeStickers) %>
             <% unless has_phone %>
-              <div class="shop-order__no-phone-warning" style="padding: 0.75em; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; text-align: center; margin-top: 4rem;">
-                <p style="margin: 0 0 0.5em 0; color: #92400e; font-weight: 600;">📱 Phone number required</p>
-                <p style="margin: 0; color: #92400e; font-size: 0.875rem;">You need a phone number on file to place an order. Please update your profile on the <a href="https://auth.hackclub.com/identity/edit">address portal</a>.</p>
+              <div class="shop-order__no-phone-warning">
+                <p class="shop-order__no-phone-title">📱 Phone number required</p>
+                <p class="shop-order__no-phone-text">You need a phone number on file to place an order. Please update your profile on the <a href="https://auth.hackclub.com/identity/edit">address portal</a>.</p>
               </div>
             <% end %>
             <%= render ActionButtonComponent.new(

@@ -48,6 +48,10 @@ body.shop-page:not(.signed-in) {
   color: var(--color-space-text);
 }
 
+body.shop-page.signed-in {
+  margin-right: 0;
+}
+
 // Ship wizard — fullscreen dark cosmic layout, no sidebar margins.
 body.ship-page {
   background-color: var(--color-space-bg);
