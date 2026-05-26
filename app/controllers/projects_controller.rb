@@ -195,13 +195,6 @@ class ProjectsController < ApplicationController
       current_user.complete_tutorial_step! :create_project
 
       project_hours = @project.total_hackatime_hours
-      # if project_hours > 0
-      #   tutorial_message OnboardingCopy::PROJECT_CREATED_WITH_HOURS.call(
-      #     helpers.distance_of_time_in_words(project_hours.hours)
-      #   )
-      # else
-      #   tutorial_message OnboardingCopy::PROJECT_CREATED_NO_HOURS
-      # end
 
       if (slug = params[:mission_slug].presence)
         mission = Mission.find_by(slug: slug)

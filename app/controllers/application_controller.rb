@@ -55,15 +55,6 @@ class ApplicationController < ActionController::Base
     impersonating? ? real_user : current_user
   end
 
-  def tutorial_message(msg)
-    flash[:tutorial_messages] ||= []
-    if msg.is_a?(Array)
-      flash[:tutorial_messages] += msg
-    else
-      flash[:tutorial_messages] << msg
-    end
-  end
-
   def tutorial_messages
     flash[:tutorial_messages] || []
   end
