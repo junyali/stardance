@@ -1,0 +1,41 @@
+<section class="vote-scorecard">
+  <div class="vote-scorecard__header">
+    <h2 class="vote-scorecard__title">Scorecard</h2>
+  </div>
+
+  <%= form_with model: vote, url: votes_path, class: "vote-scorecard__form" do |form| %>
+    <%= hidden_field_tag :vote_assignment_id, assignment.id %>
+
+    <% if vote.errors.any? %>
+      <div class="vote-scorecard__errors" role="alert">
+        <p class="vote-scorecard__errors-title">Check your vote</p>
+        <ul class="vote-scorecard__errors-list">
+          <% vote.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="vote-scorecard__scores">
+      <% Vote::SCORE_COLUMNS_BY_CATEGORY.each do |category, column| %>
+        <%= render "votes/score_input",
+                   form: form,
+                   vote: vote,
+                   category: category,
+                   column: column,
+                   description: Vote::CATEGORIES.fetch(category) %>
+      <% end %>
+    </div>
+
+    <div class="vote-scorecard__feedback">
+      <%= form.label :reason, "Feedback", class: "vote-scorecard__label" %>
+      <%= form.text_area :reason,
+                         rows: 6,
+                         class: "vote-scorecard__textarea",
+                         placeholder: "Share what you tried, what worked, and one specific improvement." %>
+    </div>
+
+    <%= form.submit "Submit vote →", class: "vote-scorecard__submit" %>
+  <% end %>
+</section>

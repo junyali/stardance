@@ -471,10 +471,9 @@ Rails.application.routes.draw do
   get "report-reviews/dismiss/:token", to: "report_reviews#dismiss", as: :dismiss_report_token
 
   # Voting
-  resources :votes, only: [ :new, :create, :index ] do
-    collection do
-      post :skip
-    end
+  resources :votes, only: [ :new, :create ]
+  namespace :votes do
+    resource :skip, only: :create
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
