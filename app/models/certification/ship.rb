@@ -27,75 +27,77 @@
 #  fk_rails_...  (project_id => projects.id)
 #  fk_rails_...  (reviewer_id => users.id)
 #
-class Certification::Ship < ApplicationRecord
-  self.table_name = "ship_reviews"
+module Certification
+  class Ship < ApplicationRecord
+    self.table_name = "ship_reviews"
 
-  include Certification::Reviewable
+    include Certification::Reviewable
 
-  belongs_to :project
-  belongs_to :reviewer, class_name: "User", optional: true
+    belongs_to :project
+    belongs_to :reviewer, class_name: "User", optional: true
 
-  has_paper_trail
+    has_paper_trail
 
-  enum :status, {
-    pending: 0,
-    approved: 1,
-    returned: 2
-  }, default: :pending
+    enum :status, {
+      pending: 0,
+      approved: 1,
+      returned: 2
+    }, default: :pending
 
-  validates :feedback, length: { maximum: 10_000 }, allow_blank: true
-  validates :internal_reason, length: { maximum: 10_000 }, allow_blank: true
+    validates :feedback, length: { maximum: 10_000 }, allow_blank: true
+    validates :internal_reason, length: { maximum: 10_000 }, allow_blank: true
 
-  scope :for_reviewer, ->(user) {
-    joins(:project)
-      .where(projects: { deleted_at: nil })
-      .where.not(project_id: user.memberships.select(:project_id))
-  }
+    scope :for_reviewer, ->(user) {
+      joins(:project)
+        .where(projects: { deleted_at: nil })
+        .where.not(project_id: user.memberships.select(:project_id))
+    }
 
-  def self.available_for(user)
-    super.merge(for_reviewer(user))
-  end
+    def self.available_for(user)
+      super.merge(for_reviewer(user))
+    end
 
-  before_save :stamp_claimed_at, if: -> { will_save_change_to_reviewer_id? && reviewer_id.present? && claimed_at.nil? }
-  before_save :stamp_decided_at, if: -> { will_save_change_to_status? && status_change&.last != "pending" && decided_at.nil? }
-  after_save :sync_project_state!, if: :saved_change_to_status?
-  after_save_commit :notify_owner!, if: -> { saved_change_to_status? && !pending? }
+    before_save :stamp_claimed_at, if: -> { will_save_change_to_reviewer_id? && reviewer_id.present? && claimed_at.nil? }
+    before_save :stamp_decided_at, if: -> { will_save_change_to_status? && status_change&.last != "pending" && decided_at.nil? }
+    after_save :apply_verdict_to_project!, if: :saved_change_to_status?
+    after_save_commit :notify_owner!, if: -> { saved_change_to_status? && !pending? }
 
-  private
+    private
 
-  def stamp_claimed_at
-    self.claimed_at = Time.current
-  end
+    def stamp_claimed_at
+      self.claimed_at = Time.current
+    end
 
-  def stamp_decided_at
-    self.decided_at = Time.current
-  end
+    def stamp_decided_at
+      self.decided_at = Time.current
+    end
 
-  def sync_project_state!
-    return if pending?
-    project.with_lock do
-      project.start_review! if project.may_start_review?
-      case status.to_sym
-      when :approved
-        project.approve! if project.may_approve?
-        project.last_ship_event&.update!(certification_status: "approved")
-      when :returned
-        project.return_for_changes! if project.may_return_for_changes?
+    def apply_verdict_to_project!
+      return if pending?
+      project.with_lock do
+        project.start_review! if project.may_start_review?
+        case status.to_sym
+        when :approved
+          project.approve! if project.may_approve?
+          project.last_ship_event&.update!(certification_status: "approved")
+        when :returned
+          project.return_for_changes! if project.may_return_for_changes?
+        end
       end
     end
-  end
 
-  def notify_owner!
-    owner = project.memberships.owner.first&.user
-    return unless owner&.slack_id.present?
+    def notify_owner!
+      owner = project.memberships.owner.first&.user
+      return unless owner&.slack_id.present?
 
-    case status.to_sym
-    when :approved
-      owner.dm_user("Your project '#{project.title}' was approved. It's out for voting now.")
-    when :returned
-      msg = "Your project '#{project.title}' needs changes before it can ship."
-      msg += "\n\n#{feedback}" if feedback.present?
-      owner.dm_user(msg)
+      case status.to_sym
+      when :approved
+        owner.dm_user("Your project '#{project.title}' was approved. It's out for voting now.")
+      when :returned
+        msg = "Your project '#{project.title}' needs changes before it can ship."
+        msg += "\n\n#{feedback}" if feedback.present?
+        owner.dm_user(msg)
+      end
     end
   end
 end
