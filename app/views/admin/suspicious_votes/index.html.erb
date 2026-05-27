@@ -1,8 +1,8 @@
 <% content_for :title, "Suspicious Votes" %>
-<h1 style="text-align: center; margin: 0.5em;">Suspicious Votes</h1>
+<h1>Suspicious Votes</h1>
 
-<div class="card">
-  <table class="table-data">
+<div>
+  <table>
     <thead>
       <tr>
         <th>#</th>
@@ -22,14 +22,13 @@
             <% if timestamp = @voting_lock_timestamps[user.id] %>
               <%= time_ago_in_words(timestamp) %> ago
             <% else %>
-              <span class="text-muted">—</span>
+              <span>—</span>
             <% end %>
           </td>
           <td>
-            <%= link_to "View Votes", votes_admin_user_path(user), class: "btn-primary slim" %>
+            <%= link_to "View Votes", votes_admin_user_path(user) %>
             <%= button_to toggle_voting_lock_admin_user_path(user),
                   method: :post,
-                  class: "btn-secondary slim",
                   title: user.voting_locked? ? "Unlock Voting" : "Lock Voting",
                   form: { onsubmit: "return confirm(#{("Are you sure you want to #{user.voting_locked? ? "unlock" : "lock"} voting for #{user.display_name}?").to_json})" } do %>
               <%= user.voting_locked? ? "Unlock" : "Lock" %>
@@ -41,4 +40,4 @@
   </table>
 </div>
 <br>
-<%= link_to "← Back to Admin", admin_root_path, class: "btn-secondary" %>
+<%= link_to "← Back to Users", admin_users_path %>

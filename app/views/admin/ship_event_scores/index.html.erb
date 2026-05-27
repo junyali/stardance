@@ -1,27 +1,27 @@
 <% content_for :title, "Ship Event Scores" %>
-<div class="ship-event-scores">
+<div>
   <div>
     <h1>Ship Event Majority Judgment Scores</h1>
-    <p class="ship-event-scores__note">Only ship events with more than 10 votes are shown.</p>
+    <p>Only ship events with more than 10 votes are shown.</p>
   </div>
 
-  <div class="ship-event-scores__charts">
-    <div class="card ship-event-scores__card">
+  <div>
+    <div>
       <h3>Overall percentile distribution</h3>
-      <div class="ship-event-scores__chart-wrap">
+      <div>
         <canvas id="overallPercentileChart"></canvas>
       </div>
     </div>
-    <div class="card ship-event-scores__card">
+    <div>
       <h3>Overall score distribution (avg of medians)</h3>
-      <div class="ship-event-scores__chart-wrap">
+      <div>
         <canvas id="overallScoreChart"></canvas>
       </div>
     </div>
   </div>
 
-  <div class="ship-event-scores__table-wrap">
-  <table class="table-data ship-event-scores__table">
+  <div>
+  <table>
   <thead>
     <tr>
       <th>Ship Event</th>
@@ -73,14 +73,14 @@
         <td><%= ship_event.created_at.strftime("%Y-%m-%d") %></td>
         <td>
           <% if @convergence_data[ship_event.id].present? %>
-            <details class="ship-event-scores__details" data-ship-event-id="<%= ship_event.id %>">
+            <details data-ship-event-id="<%= ship_event.id %>">
               <summary>View</summary>
-              <div class="ship-event-scores__chart-wrap">
+              <div>
                 <canvas id="convergence-chart-<%= ship_event.id %>"></canvas>
               </div>
             </details>
           <% else %>
-            <span class="ship-event-scores__muted">No data</span>
+            <span>No data</span>
           <% end %>
         </td>
       </tr>

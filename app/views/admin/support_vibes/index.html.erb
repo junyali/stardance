@@ -1,14 +1,14 @@
 <% content_for :title, "Support Vibes" %>
 <%= render HeadingComponent.new(title: "Support Vibes", tone: :blue, size: :full) %>
-<h2 class="warning">this data was generated using ai analysis so take it with a grain of salt or smth kthxbye</h2>
+<h2>this data was generated using ai analysis so take it with a grain of salt or smth kthxbye</h2>
 
 <% if Rails.env.development? %>
-  <%= button_to "✨ DO DA VIBE CHECK ✨", admin_support_vibes_path, method: :post, class: "btn-primary" %>
+  <%= button_to "✨ DO DA VIBE CHECK ✨", admin_support_vibes_path, method: :post %>
 <% end %>
 
-<div class="support-vibes-trend-graph">
+<div>
   <h3>Support Vibes Trend</h3>
-  <div class="support-vibes-graph">
+  <div>
     <canvas id="supportVibesChart" height="200"></canvas>
   </div>
 </div>
@@ -66,7 +66,7 @@
 </script>
 
 <% if @vibes.any? %>
-  <div class="vibe-feed">
+  <div>
     <% @vibes.each do |vibe| %>
       <%
         rating_color = case vibe.rating
@@ -77,31 +77,31 @@
         end
       %>
 
-      <div class="card" style="border-left: 0.5em solid <%= rating_color %>;">
-        <div class="card__header">
-          <div class="card__header--left">
-            <h2 style="margin: 0; font-size: 1.5rem;">
+      <div>
+        <div>
+          <div>
+            <h2>
               <%= vibe.period_end.strftime("%B %d, %Y") %>
-              <span class="badge"><%= vibe.rating&.upcase %> VIBES</span>
+              <span><%= vibe.rating&.upcase %> VIBES</span>
             </h2>
-            <small class="text-muted">
+            <small>
               Analyzing <%= vibe.period_start.strftime("%H:%M") %> - <%= vibe.period_end.strftime("%H:%M") %>
             </small>
           </div>
-          <div class="card__header--right">
-            <div style="font-size: 1.25rem; %>">
+          <div>
+            <div>
               <%= vibe.overall_sentiment %> Sentiment
             </div>
-            <small class="text-muted"><%= vibe.sentiment_label %></small>
+            <small><%= vibe.sentiment_label %></small>
           </div>
         </div>
 
-        <div class="card__content">
-          <div class="concerns-section">
+        <div>
+          <div>
             <h3>Top 5 Concerns</h3>
-            <div class="concerns-list">
+            <div>
               <% (vibe.concerns || []).each do |concern| %>
-                <div class="concern-item">
+                <div>
                   <% if concern.is_a?(Hash) %>
                     <h4><%= concern["title"] %></h4>
                     <p><%= concern["description"] %></p>
@@ -113,10 +113,10 @@
             </div>
           </div>
 
-          <div class="questions-section">
+          <div>
             <h3>Prominent Questions</h3>
             <% vibe.notable_quotes.presence.each do |q| %>
-              <div class="question-item">
+              <div>
                 <blockquote>
                   "<%= q %>"
                 </blockquote>
@@ -124,11 +124,11 @@
             <% end %>
 
             <% if vibe.respond_to?(:unresolved_queries) && vibe.unresolved_queries.present? %>
-              <div class="unresolved-section">
+              <div>
                 <h3>Still Unresolved Queries</h3>
-                <div class="unresolved-grid">
+                <div>
                   <% vibe.unresolved_queries.each do |category, questions| %>
-                    <div class="unresolved-category">
+                    <div>
                       <h4><%= category %></h4>
                       <ul>
                         <% Array(questions).each do |q| %>
@@ -146,106 +146,7 @@
     <% end %>
   </div>
 <% else %>
-  <div class="card">
+  <div>
     <p>No vibes checked yet. Be the first to check the vibes!</p>
   </div>
 <% end %>
-
-<style>
-  .btn-primary {
-    font-size: 1.75rem;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
-    margin: 2rem 0;
-  }
-
-  .warning {
-    text-align: center;
-    font-weight: normal;
-    font-size: 1.2rem;
-    margin: 0;
-  }
-
-  .vibe-feed {
-    display: flex;
-    flex-direction: column;
-    gap: 2em;
-  }
-
-  .card__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-  }
-
-  .card__header--right {
-    text-align: right;
-  }
-
-  .card__content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
-
-  h3 {
-    border-bottom: 2px solid #eee;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem !important;
-  }
-
-  h4 {
-    margin-top: 1rem !important;
-  }
-
-  p {
-    margin: 0;
-    font-size: 0.95rem;
-    color: #444;
-  }
-
-  .questions-item {
-    margin-bottom: 1rem;
-  }
-
-  blockquote {
-    border-left: 3px solid #ccc;
-    padding-left: 0.5rem;
-    color: #555;
-    font-style: italic;
-    margin-bottom: 1rem;
-  }
-
-  .unresolved-section {
-    grid-column: 1 / -1;
-    margin-top: 2rem;
-    border-top: 2px solid #eee;
-    padding-top: 1rem;
-  }
-
-  .unresolved-grid {
-    display: grid;
-    grid-template-columns:
-    repeat(auto-fill, minmax(300px, 1fr));
-    gap: 0.2em;
-  }
-
-  .unresolved-category h4 {
-    color: #666;
-    font-size: 1em;
-    font-weight: normal;
-  }
-
-  .unresolved-category ul {
-    padding-left: 1.2rem;
-    margin: 0.5rem 0;
-  }
-
-  .unresolved-category li {
-    font-size: 0.9rem;
-    margin-bottom: 0.15rem;
-    line-height: 0.9;
-  }
-</style>

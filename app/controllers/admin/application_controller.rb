@@ -13,9 +13,9 @@ module Admin
     before_action :authenticate_admin, unless: :mission_control_jobs?
     before_action :set_paper_trail_whodunnit
 
-    # Shared admin dashboard logic
     def index
       authorize :admin, :index?
+      redirect_to admin_users_path
     end
 
     private
@@ -58,12 +58,8 @@ module Admin
       end
     end
 
-    def admin_dashboard_request?
-      controller_name == "application" && action_name == "index"
-    end
-
     def shop_manager_request?
-      controller_name.in?(%w[shop_items shop_orders shop]) || admin_dashboard_request?
+      controller_name.in?(%w[application shop_items shop_orders shop])
     end
 
     # Handles unauthorized access

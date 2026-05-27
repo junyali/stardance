@@ -59,5 +59,3 @@
 @use "pages/mission_submissions/index" as mission_submissions_index;
 @use "pages/mission_submissions/show" as mission_submissions_show;
 @use "pages/manage/missions_edit" as manage_missions_edit;
-@use "pages/admin/missions" as admin_missions;
-@use "pages/admin/_voting_dashboard";
