@@ -4,12 +4,9 @@ class MarkdownRenderer
     "img" => { "src"  => %w[http https] }
   }.freeze
 
-  # Bump RENDERER_VERSION on any change that affects rendered output
-  # (sanitizer rule change, new shortcode, Rouge upgrade, link-hardening
-  # tweak, etc.) — the cache key includes this string, so bumping
-  # invalidates every entry deployment-wide. Without this, sanitizer fixes
-  # serve stale HTML for up to CACHE_EXPIRES_IN.
-  RENDERER_VERSION      = "v1".freeze
+  # Bump on any rendered-output change (sanitizer, shortcodes, Rouge, link
+  # hardening) — the cache key uses it to invalidate deployment-wide.
+  RENDERER_VERSION      = "v2".freeze
   CACHE_NAMESPACE       = "markdown".freeze
   GUIDE_CACHE_NAMESPACE = "guide-markdown".freeze
   CACHE_EXPIRES_IN      = 7.days
@@ -47,9 +44,6 @@ class MarkdownRenderer
     end
   end
 
-  # Anchor + image hardening shared with GuideMarkdownRenderer#post_process.
-  # Both renderers want the same target=_blank / loading=lazy treatment;
-  # extracting here keeps the two from drifting.
   def self.harden_links_and_images(doc)
     doc.css("a").each do |link|
       href = link["href"]

@@ -11,13 +11,14 @@ class GuideMarkdownRenderer
   BLOCK_SHORTCODE_RE = /^:::(?<name>[a-z][a-z0-9_-]*)(?<attrs>(?:[ \t]+[a-z][a-z0-9_-]*=(?:"[^"\n]*"|[^\s"]+))*)[ \t]*\n(?<content>(?:(?!^:::).)*)^:::[ \t]*(?=\n|\z)/m
   INLINE_SHORTCODE_RE = /::(?<name>[a-z][a-z0-9_-]*)\[(?<content>[^\[\]\n]*)\]/x
   ATTR_RE             = /([a-z][a-z0-9_-]*)=("[^"]*"|\S+)/
-  BLOCK_MARKER_RE     = /\[\[GUIDE_BLOCK:(\d+)\]\]/
-  INLINE_MARKER_RE    = /\[\[GUIDE_INLINE:(\d+)\]\]/
-  CODE_MARKER_RE      = /\A\[\[GUIDE_CODE:(\d+)\]\]\z/
 
   CALLOUT_TYPES     = %w[info tip warning danger].freeze
   BLOCK_SHORTCODES  = %w[callout collapse].freeze
   INLINE_SHORTCODES = %w[kbd mark].freeze
+
+  # Rouge's lexer tags are by convention alphanumeric / underscore / dash, but
+  # we filter defensively before interpolating into a class attribute.
+  LANGUAGE_CLASS_RE = /\A[a-z0-9_-]+\z/i
 
   def self.render(text)
     new(text).call
@@ -28,6 +29,11 @@ class GuideMarkdownRenderer
     @block_registry  = []
     @inline_registry = []
     @code_registry   = []
+    # Per-render salt prevents users from typing a literal marker token like
+    # `[[GUIDE_BLOCK:0]]` and tricking the expand passes into replaying a
+    # registry entry. Markers are emitted by us during extraction and only
+    # ever match for the same instance's expansion phase.
+    @marker_salt = SecureRandom.hex(8)
   end
 
   def call
@@ -38,8 +44,8 @@ class GuideMarkdownRenderer
     end
 
     outline = build_outline(text_with_markers)
-    html    = render_pipeline(text_with_markers, depth: 0)
-    Result.new(html: html, outline: outline)
+    html    = render_pipeline(text_with_markers, depth: 0).freeze
+    Result.new(html: html, outline: outline).freeze
   end
 
   private
@@ -63,7 +69,7 @@ class GuideMarkdownRenderer
 
       id = @block_registry.size
       @block_registry << { name: name, attrs: attrs, content: match[:content] }
-      text = text.sub(match[0], "\n\n[[GUIDE_BLOCK:#{id}]]\n\n")
+      text = text.sub(match[0], "\n\n#{block_marker(id)}\n\n")
     end
     text
   end
@@ -75,12 +81,20 @@ class GuideMarkdownRenderer
       if INLINE_SHORTCODES.include?(name)
         id = @inline_registry.size
         @inline_registry << { name: name, content: content }
-        "[[GUIDE_INLINE:#{id}]]"
+        inline_marker(id)
       else
         ""
       end
     end
   end
+
+  def block_marker_re  = /\[\[GUIDE_BLOCK:#{Regexp.escape(@marker_salt)}:(\d+)\]\]/
+  def inline_marker_re = /\[\[GUIDE_INLINE:#{Regexp.escape(@marker_salt)}:(\d+)\]\]/
+  def code_marker_re   = /\A\[\[GUIDE_CODE:#{Regexp.escape(@marker_salt)}:(\d+)\]\]\z/
+
+  def block_marker(id)  = "[[GUIDE_BLOCK:#{@marker_salt}:#{id}]]"
+  def inline_marker(id) = "[[GUIDE_INLINE:#{@marker_salt}:#{id}]]"
+  def code_marker(id)   = "[[GUIDE_CODE:#{@marker_salt}:#{id}]]"
 
   def parse_attrs(str)
     attrs = {}
@@ -91,10 +105,6 @@ class GuideMarkdownRenderer
     attrs
   end
 
-  # Builds a slug assigner that tracks collisions: the second "Setup" heading
-  # becomes "section-setup-2", not a duplicate of the first. build_outline and
-  # section_by_h2 each construct their own assigner and walk headings in
-  # document order so the slugs line up.
   def slug_assigner
     seen = Hash.new(0)
     ->(heading_text) {
@@ -134,16 +144,13 @@ class GuideMarkdownRenderer
       },
     )
 
-    # Extract language-tagged code blocks BEFORE sanitize — class="language-X"
-    # gets stripped by the sanitizer, so we'd otherwise lose the language hint.
-    # The marker survives sanitize as plain text inside <pre>, and we expand
-    # it back to rouge-highlighted HTML after the rest of the pipeline runs.
+    # Pull code blocks out BEFORE sanitize — class="language-X" wouldn't survive.
     raw_html = extract_code_blocks(raw_html)
 
     sanitized = MarkdownRenderer.sanitize_html(
       raw_html,
       extra_tags:       %w[u kbd mark table thead tbody tfoot tr th td],
-      extra_attributes: %w[target rel id]
+      extra_attributes: %w[target rel]
     )
 
     doc = Nokogiri::HTML5.fragment(sanitized)
@@ -157,10 +164,8 @@ class GuideMarkdownRenderer
 
   def extract_code_blocks(html)
     doc = Nokogiri::HTML5.fragment(html)
-    # Commonmarker 2.x emits language-tagged code blocks as `<pre lang="X">`
-    # with its own inline-styled token spans inside. We want our rouge output
-    # instead, so swap the whole block for a placeholder. The pre's text
-    # content concatenates the spans and gives us the original source back.
+    # Replace Commonmarker's inline-styled <pre lang> blocks with a placeholder;
+    # we'll re-render via Rouge in expand_code_blocks.
     doc.css("pre[lang]").each do |pre_node|
       language = pre_node["lang"].to_s.strip
       next if language.empty?
@@ -170,7 +175,7 @@ class GuideMarkdownRenderer
       @code_registry << { language: language, code: code_text }
 
       placeholder = Nokogiri::XML::Node.new("pre", doc.document)
-      placeholder.content = "[[GUIDE_CODE:#{id}]]"
+      placeholder.content = code_marker(id)
       pre_node.replace(placeholder)
     end
     doc.to_html
@@ -178,7 +183,7 @@ class GuideMarkdownRenderer
 
   def expand_code_blocks(doc)
     doc.css("pre").each do |pre|
-      match = pre.text.strip.match(CODE_MARKER_RE)
+      match = pre.text.strip.match(code_marker_re)
       next unless match
 
       entry = @code_registry[match[1].to_i]
@@ -188,35 +193,35 @@ class GuideMarkdownRenderer
     end
   end
 
-  # Renders a fenced code block with Rouge syntax highlighting. Falls back to
-  # plain text when the language isn't recognized (Rouge ships hundreds, but
-  # authors can still type something obscure).
   def render_code_block(entry)
     lexer = Rouge::Lexer.find(entry[:language])&.new || Rouge::Lexers::PlainText.new
     formatter = Rouge::Formatters::HTML.new
     highlighted = formatter.format(lexer.lex(entry[:code]))
-    language_class = lexer.tag
+    language_class = lexer.tag.to_s
+    language_class = "plaintext" unless language_class.match?(LANGUAGE_CLASS_RE)
     %(<pre class="guide-code"><code class="language-#{language_class}">#{highlighted}</code></pre>)
   end
 
-  # Collect-then-apply: mutating the DOM while doc.traverse walks it can
-  # invalidate libxml2's cursor. Build the full work list first, then apply
-  # the replacements once the walk is done.
+  # Collect-then-apply: mutating during doc.traverse invalidates libxml2's cursor.
   def expand_blocks(doc, depth:)
+    block_re = block_marker_re
+    sole_block_re = /\A#{block_re.source}\z/
     replacements = []
     doc.traverse do |node|
       next unless node.text?
-      next unless node.content =~ BLOCK_MARKER_RE
+      next unless node.content =~ block_re
 
       parent = node.parent
-      if parent && parent.name == "p" && parent.content.strip =~ /\A\[\[GUIDE_BLOCK:\d+\]\]\z/
-        id = parent.content.strip[/\d+/].to_i
-        replacement_html = render_block_shortcode(@block_registry[id], depth: depth + 1)
+      if parent && parent.name == "p" && parent.content.strip =~ sole_block_re
+        id = Regexp.last_match(1).to_i
+        entry = @block_registry[id]
+        replacement_html = entry ? render_block_shortcode(entry, depth: depth + 1) : ""
         replacements << [ parent, replacement_html ]
       else
-        new_content = node.content.gsub(BLOCK_MARKER_RE) do
+        new_content = node.content.gsub(block_re) do
           id = Regexp.last_match(1).to_i
-          render_block_shortcode(@block_registry[id], depth: depth + 1)
+          entry = @block_registry[id]
+          entry ? render_block_shortcode(entry, depth: depth + 1) : ""
         end
         replacements << [ node, new_content ]
       end
@@ -228,14 +233,16 @@ class GuideMarkdownRenderer
   end
 
   def expand_inlines(doc)
+    inline_re = inline_marker_re
     replacements = []
     doc.traverse do |node|
       next unless node.text?
-      next unless node.content =~ INLINE_MARKER_RE
+      next unless node.content =~ inline_re
 
-      new_content = node.content.gsub(INLINE_MARKER_RE) do
+      new_content = node.content.gsub(inline_re) do
         id = Regexp.last_match(1).to_i
-        render_inline_shortcode(@inline_registry[id])
+        entry = @inline_registry[id]
+        entry ? render_inline_shortcode(entry) : ""
       end
       replacements << [ node, new_content ]
     end

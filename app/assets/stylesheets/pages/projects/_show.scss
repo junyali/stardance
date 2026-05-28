@@ -655,9 +655,6 @@ turbo-frame#project_hero {
   gap: 14px;
   align-items: stretch;
   position: sticky;
-  // Mirror the parent `.app-layout__main` flex gap so the sticky row keeps
-  // the same breathing room from the viewport top as it has from the hero
-  // above it in the unscrolled state.
   top: var(--space-m);
   z-index: 5;
 

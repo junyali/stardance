@@ -1,9 +1,3 @@
-// Admin missions — rendered inside the standard application layout (.app-layout)
-// so the page reads the same as the rest of Stardance. BEM block = .admin-mission.
-// Patterned after .manage-mission and .mission-home (see _missions_edit.scss and
-// pages/missions/_show.scss): section cards on the dark space backdrop, h2
-// section titles, brand-aligned inputs.
-
 .admin-mission {
   margin: var(--space-l) 0 var(--space-xxl);
   color: var(--color-space-text);
@@ -62,7 +56,6 @@
   gap: var(--space-xs);
 }
 
-// Filter nav — pill tabs.
 .admin-mission__filter {
   display: inline-flex;
   flex-wrap: wrap;
@@ -101,7 +94,6 @@
   }
 }
 
-// Section cards — matches .manage-mission__section.
 .admin-mission__section {
   margin: var(--space-l) 0;
   padding: var(--space-l);
@@ -167,7 +159,6 @@
   color: var(--color-brand-cream);
 }
 
-// Yes/no status pills.
 .admin-mission__bool {
   display: inline-block;
   padding: 2px 10px;
@@ -188,7 +179,6 @@
   }
 }
 
-// Generic list rows — used for prizes, memberships, steps, etc.
 .admin-mission__list {
   list-style: none;
   margin: 0;
@@ -214,7 +204,6 @@
   }
 }
 
-// Guide-body outline: numbered mint chips.
 .admin-mission__outline {
   list-style: none;
   margin: 0 0 var(--space-m);
@@ -249,7 +238,6 @@
   }
 }
 
-// Details grid (slug / enabled / etc).
 .admin-mission__details {
   display: grid;
   grid-template-columns: max-content 1fr;
@@ -272,7 +260,6 @@
   }
 }
 
-// Collapsible rendered preview.
 .admin-mission__preview {
   margin-top: var(--space-m);
   border: 1px solid var(--color-space-border);
@@ -309,7 +296,6 @@
   }
 }
 
-// Form — branded inputs on the dark surface.
 .admin-mission__form {
   display: flex;
   flex-direction: column;
@@ -415,7 +401,6 @@
   }
 }
 
-// Inline "add row" forms (add step, add prize, etc.).
 .admin-mission__inline-form {
   display: flex;
   flex-wrap: wrap;
@@ -439,7 +424,6 @@
   }
 }
 
-// Index table — branded card with hover rows.
 .admin-mission__table {
   width: 100%;
   border-collapse: collapse;
@@ -482,7 +466,6 @@
   }
 }
 
-// Audit log table — denser, same chrome.
 .admin-mission__audit-log {
   width: 100%;
   border-collapse: collapse;

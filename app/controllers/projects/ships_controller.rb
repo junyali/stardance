@@ -33,9 +33,8 @@ class Projects::ShipsController < ApplicationController
 
   def create
     authorize @project, :ship?
-    # Read wizard state non-destructively until validation passes — a redirect
-    # back to review_step (e.g. missing ack) would otherwise leave the user
-    # with an empty wizard and force them to re-enter steps 2 & 3.
+    # Read non-destructively — a redirect back (e.g. missing ack) must not
+    # clear steps 2 & 3 from the wizard.
     wizard = session[:ship_wizard] || {}
     review_instructions = (wizard["review_instructions"].presence || params[:review_instructions]).to_s.strip.presence
     mission_payout_path = wizard["mission_payout_path"].presence || params[:mission_payout_path]
@@ -124,8 +123,7 @@ class Projects::ShipsController < ApplicationController
       payout_path = resolve_payout_path(mission, payout_path_param)
       ack_time = (submission_guide_acknowledged && mission.submission_guide.present?) ? Time.current : nil
 
-      # `status` is managed by AASM and defaults to :awaiting_certification on
-      # create — passing it explicitly trips no_direct_assignment.
+      # Don't pass status — AASM defaults it and rejects direct assignment.
       Mission::Submission.create!(
         ship_event: ship_event,
         mission: mission,

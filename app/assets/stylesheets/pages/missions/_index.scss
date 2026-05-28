@@ -1,6 +1,3 @@
-// Missions index — themed track listing. Mirrors the dark-space styling used
-// on profile/project/guide pages.
-
 .missions-index__header {
   margin: var(--space-xxl) 0 var(--space-l);
 }
@@ -53,8 +50,6 @@
   color: var(--color-space-text-muted, var(--color-space-text));
 }
 
-// Mission card — used on the index grid. Picks up dark-space styling from
-// the layout-level tokens.
 .mission-card {
   display: flex;
   align-items: center;
@@ -77,11 +72,7 @@
     background: var(--color-space-card-hover, rgba(255, 255, 255, 0.06));
   }
 
-  // Manageable cards (admin or mission owner) get the canonical admin /
-  // staff-only marker — a 2px orange dashed border (see
-  // docs/branding.md §1.5). Distinct from the regular yellow hover state
-  // and from salmon (warn/destructive), and the dashed style reads as
-  // "non-public / draft-ish" at a glance.
+  // Orange dashed border = admin / manageable-by-viewer marker (branding §1.5).
   &--manageable {
     border-style: dashed;
     border-width: 2px;
@@ -126,7 +117,6 @@
   font-size: 0.95rem;
   line-height: 1.4;
   color: var(--color-space-text-muted, var(--color-space-text));
-  // Two-line clamp keeps cards even-height in the grid.
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

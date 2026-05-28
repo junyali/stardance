@@ -22,12 +22,8 @@
 class Mission::StepBody < ApplicationRecord
   self.table_name = "mission_step_bodies"
 
-  # Intentionally no PaperTrail: every step CRUD writes every step body via
-  # the regenerate path, multiplied by language count. The parent
-  # Mission::GuideVariant.body is already versioned with the same content
-  # (it's a join of all the StepBody markdown), so versioning here would
-  # quadruple the audit churn for no recoverable history we don't already
-  # have via the variant.
+  # No PaperTrail by design — the parent GuideVariant.body is already versioned
+  # with the same content, so versioning here is redundant audit churn.
 
   belongs_to :step, class_name: "Mission::Step",
                     foreign_key: :mission_step_id,
@@ -35,7 +31,7 @@ class Mission::StepBody < ApplicationRecord
 
   validates :language, presence: true, length: { maximum: 64 },
                        uniqueness: { scope: :mission_step_id, case_sensitive: false }
-  validates :body, presence: false  # empty bodies are allowed (placeholder)
+  validates :body, presence: false
 
   before_save :stamp_body_updated_at, if: :body_changed?
 

@@ -15,15 +15,9 @@
           <% end %>
         </h1>
         <div class="admin-mission__actions">
-          <%= link_to "Manage this mission →",
-                      edit_manage_mission_path(@mission.slug),
+          <%= link_to "Edit this mission →",
+                      edit_admin_mission_path(@mission.slug),
                       class: "action-btn action-btn--small action-btn--primary" %>
-          <%= render ActionButtonComponent.new(
-                text: "Edit slug · danger zone",
-                href: edit_admin_mission_path(@mission.slug),
-                size: :small,
-                variant: :secondary
-              ) %>
         </div>
       </header>
 
@@ -56,7 +50,7 @@
         <p class="admin-mission__hint">
           Mission content (description, guide, prizes, memberships, shop unlocks,
           default project copy, etc.) lives on the
-          <%= link_to "manage page", edit_manage_mission_path(@mission.slug), class: "admin-mission__link" %>.
+          <%= link_to "edit page", edit_admin_mission_path(@mission.slug), class: "admin-mission__link" %>.
         </p>
       </section>
 

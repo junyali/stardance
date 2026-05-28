@@ -1,10 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 
-// Saves the current scroll position to sessionStorage whenever a form inside
-// this controller's scope is submitted, then restores it on the next page
-// load. Keeps the manage edit page from jumping to top every time you
-// reorder a step / remove a prize / etc. Only form submits trigger a save —
-// plain link clicks (e.g. language tabs) still reset to top as expected.
+// Persists scrollY across form submits so the manage edit page doesn't snap
+// to top after every inline action. Link clicks still reset normally.
 export default class extends Controller {
   connect() {
     this.restoreOnce();
@@ -25,9 +22,7 @@ export default class extends Controller {
   save() {
     try {
       sessionStorage.setItem(this.storageKey(), String(window.scrollY));
-    } catch {
-      // sessionStorage can throw on quota / private mode — non-fatal.
-    }
+    } catch {}
   }
 
   restoreOnce() {
@@ -37,10 +32,8 @@ export default class extends Controller {
       sessionStorage.removeItem(this.storageKey());
       const y = parseInt(raw, 10);
       if (Number.isNaN(y)) return;
-      // Wait a frame so layout settles (images/fonts) before scrolling.
+      // Wait a frame so layout settles before scrolling.
       requestAnimationFrame(() => window.scrollTo(0, y));
-    } catch {
-      // fail silent
-    }
+    } catch {}
   }
 }

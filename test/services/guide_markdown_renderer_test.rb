@@ -354,4 +354,72 @@ class GuideMarkdownRendererTest < ActiveSupport::TestCase
     refute_includes html, "<script>alert"
     assert_includes html, "&lt;script&gt;"
   end
+
+  # --- marker spoofing ------------------------------------------------------
+
+  test "user-typed block marker does not replay a real block" do
+    md = <<~MD
+      :::callout type="warning"
+      real callout body
+      :::
+
+      [[GUIDE_BLOCK:0]]
+    MD
+    html = render(md).html
+    # Real callout body appears once; the unsalted marker the user typed
+    # passes through as plain text (safe — brackets are fine in HTML) and
+    # critically does not trigger a second expansion.
+    assert_equal 1, html.scan("real callout body").length
+    assert_includes html, "[[GUIDE_BLOCK:0]]"
+  end
+
+  test "user-typed inline marker does not replay a real inline shortcode" do
+    md = "Press ::kbd[Ctrl+S]. Stray: [[GUIDE_INLINE:0]]"
+    html = render(md).html
+    assert_equal 1, html.scan(%(<kbd class="guide-kbd">Ctrl+S</kbd>)).length
+  end
+
+  test "user-typed code marker inside a fenced block does not replay code" do
+    md = <<~MD
+      ```js
+      const real = 1;
+      ```
+
+      ```txt
+      [[GUIDE_CODE:0]]
+      ```
+    MD
+    html = render(md).html
+    assert_equal 1, html.scan("const").length
+  end
+
+  test "out-of-range block marker noops instead of crashing" do
+    salt = SecureRandom.hex(8)
+    md = "before [[GUIDE_BLOCK:#{salt}:99]] after"
+    html = render(md).html
+    assert_includes html, "before"
+    assert_includes html, "after"
+  end
+
+  # --- id attribute --------------------------------------------------------
+
+  test "author-supplied id attribute on inline html is stripped" do
+    html = render("<p id='evil'>x</p>").html
+    refute_includes html, %(id="evil")
+  end
+
+  test "auto-generated section h2 id still rendered" do
+    html = render("## Hello\n\nx").html
+    assert_includes html, %(id="section-hello")
+  end
+
+  # --- code language class -------------------------------------------------
+
+  test "language class on rouge output is alphanumeric only" do
+    md = "```js\nconst x = 1;\n```\n"
+    html = render(md).html
+    match = html.match(/class="language-([^"]+)"/)
+    assert match
+    assert_match(/\A[a-z0-9_-]+\z/i, match[1])
+  end
 end

@@ -1,17 +1,8 @@
 import { Controller } from "@hotwired/stimulus";
 
-// Segmented control above the guide sidebar that lets a builder switch
-// between programming-language variants of the guide. Each option carries a
-// data-language attribute; clicking it reloads the page with ?language=X.
-// We do a full reload because the page server-renders different sections per
-// language, including the section completion state.
-//
-// Per-mission, the picked language is also written to localStorage so that
-// a user who hops away and back lands in their preferred variant. The
-// auto-honor of that preference is deliberately gated: we only act on it
-// when the URL has no language query, AND we only redirect once per page
-// load, AND only if the stored language is currently available. Deep links
-// like /missions/x/guide?language=Python always win.
+// Language picker for the guide. Reloads with ?language=X (the page is
+// server-rendered per language) and remembers the choice per-mission in
+// localStorage. Explicit URL queries always beat the stored preference.
 export default class extends Controller {
   static targets = ["option"];
   static values = {
@@ -51,9 +42,7 @@ export default class extends Controller {
 
       url.searchParams.set("language", stored);
       window.location.replace(url.toString());
-    } catch {
-      // localStorage might be unavailable; that's fine
-    }
+    } catch {}
   }
 
   select(event) {
@@ -63,9 +52,7 @@ export default class extends Controller {
 
     try {
       window.localStorage.setItem(this.storageKey(), lang);
-    } catch {
-      // fail silent
-    }
+    } catch {}
 
     const url = new URL(window.location.href);
     url.searchParams.set("language", lang);

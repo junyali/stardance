@@ -171,9 +171,6 @@ class ProjectsController < ApplicationController
                        .limit(8)
   end
 
-  # Mission ids the current user already has at least one active project on.
-  # Used to hide already-attached missions from the picker so a user can't
-  # land on the same mission twice.
   def missions_user_already_has_a_project_on
     return [] unless current_user
     current_user.projects

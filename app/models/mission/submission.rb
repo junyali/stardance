@@ -93,9 +93,7 @@ class Mission::Submission < ApplicationRecord
     pending.where("created_at < ?", days.days.ago)
   }
 
-  # Users who should be notified when this submission becomes :pending.
-  # Per-mission owners + reviewers, plus global :mission_reviewer holders.
-  # Excludes the builder/teammates so we never ask people to self-review.
+  # Per-mission + global reviewers, minus teammates (no self-review).
   def reviewer_recipients
     teammate_ids = ship_event&.post&.project&.users&.pluck(:id) || []
 

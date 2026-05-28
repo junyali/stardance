@@ -1,10 +1,3 @@
-// Guide content — typography + shortcode primitives used by the mission guide
-// pipeline. Lives on the dark space backdrop and reaches for the Stardance
-// brand palette for callouts and accents. BEM blocks:
-// .guide-content / .guide-callout / .guide-collapse / .guide-section.
-// All author-facing typography is theme-aware (no hardcoded
-// colors below var() tokens).
-
 .guide-content {
   font-family: var(--font-family-text);
   color: var(--color-space-text);
@@ -164,8 +157,6 @@
   }
 }
 
-// Sections wrap content between h2 boundaries. The progress sidebar reads
-// data-section-index for scroll-spying.
 .guide-section {
   scroll-margin-top: var(--space-xxl);
 
@@ -174,9 +165,6 @@
   }
 }
 
-// Callout — pastel-tinted note with a left-edge accent. One modifier per type
-// (info / tip / warning / danger). Pulls from the brand palette so callouts
-// look intentional next to the rest of the surface.
 .guide-callout {
   display: block;
   border-radius: var(--profile-radius);
@@ -222,8 +210,6 @@
   }
 }
 
-// Collapse — disclosure block. Uses <details>/<summary>. The summary becomes
-// a click target; opening reveals the body.
 .guide-collapse {
   margin: var(--space-m) 0;
   border: 1px solid var(--color-space-border);
@@ -268,7 +254,6 @@
   }
 }
 
-// Inline shortcodes — render to tiny styled spans.
 .guide-kbd {
   display: inline-block;
   padding: 0.05em 0.5em;

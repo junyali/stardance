@@ -82,7 +82,6 @@ class Projects::SetupController < ApplicationController
     existing = project.mission_attachments.find_by(mission_id: mission.id)
 
     if existing&.detached_at.nil? && existing.present?
-      # Already actively attached — no-op.
       redirect_to(next_gate_after_details_path) and return
     end
 
@@ -94,9 +93,8 @@ class Projects::SetupController < ApplicationController
       project.mission_attachments.create!(mission: mission, attached_at: Time.current)
     end
 
-    # Apply the mission's authored defaults only on the FIRST attach for this
-    # (project, mission) pair. Re-picking after detach (or repeated re-picks)
-    # never touches title/description — the builder may have edited those.
+    # Authored defaults apply only on first attach — never overwrite a
+    # builder's edits on re-attach.
     if is_first_attach
       attrs = {}
       if project.title.blank? || project.title == DEFAULT_PROJECT_TITLE
@@ -204,9 +202,6 @@ class Projects::SetupController < ApplicationController
     end
   end
 
-  # Mission ids the current user has at least one still-active, not-deleted
-  # project attached to. Filtered out of the picker so a user can't end up
-  # with two projects on the same mission.
   def missions_user_already_has_a_project_on
     current_user.projects
                 .where(deleted_at: nil)

@@ -162,9 +162,6 @@
     line-height: 1.35;
   }
 
-  // Meta row holding the difficulty + step-count pills below the card
-  // description. align-self keeps it hugging the left edge inside the
-  // column-flex card body instead of stretching to the body's full width.
   &__card-meta {
     align-self: flex-start;
     display: flex;
@@ -183,9 +180,6 @@
     text-transform: uppercase;
   }
 
-  // Step-count pill — neutral (no uppercase / letterspacing) to differentiate
-  // from the difficulty pill semantically. Mirrors the events-page card's
-  // `<li>X-step guide</li>` styling.
   &__card-steps {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 999px;

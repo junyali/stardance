@@ -612,15 +612,31 @@ Rails.application.routes.draw do
         post :trigger
       end
     end
+  end
 
+  # Mission management under /admin/ — the URL prefix is `admin`, but
+  # AdminConstraint is intentionally NOT applied here so non-admin mission
+  # owners can edit their own missions via Pundit's `MissionPolicy#manage?`.
+  # Per-action authorization lives in Admin::MissionsController and the
+  # Admin::Missions::* sub-resource controllers (admin-only actions vs
+  # manage actions are gated separately inside those controllers).
+  namespace :admin do
     resources :missions, param: :slug do
-      # Step/prize/shop-unlock CRUD lives on the manage namespace. Admins
-      # access those via MissionPolicy#manage?. Owner assignment stays
-      # admin-only — managers can only edit reviewers via manage.
-      resources :memberships, only: [ :create, :destroy ], controller: "mission_memberships"
       member do
         post :restore
       end
+      # Nested sub-resources live in the Admin::Missions:: namespace,
+      # mirroring the Mission::Step / Mission::Prize / Mission::Membership /
+      # Mission::ShopUnlock model namespace. `controller:` is set explicitly
+      # because `scope module: :missions` doesn't reliably propagate inside
+      # a parent `resources do ... end` block.
+      resource  :guide_paste,    only: [ :create ],                  controller: "missions/guide_pastes"
+      resource  :guide_preview,  only: [ :create ],                  controller: "missions/guide_previews"
+      resources :memberships,    only: [ :create, :update, :destroy ], controller: "missions/memberships"
+      resources :steps,          only: [ :create, :update, :destroy ], controller: "missions/steps"
+      resource  :step_ordering,  only: [ :create ],                  controller: "missions/step_orderings"
+      resources :prizes,         only: [ :create, :update, :destroy ], controller: "missions/prizes"
+      resources :shop_unlocks,   only: [ :create, :destroy ],          controller: "missions/shop_unlocks"
     end
 
     namespace :certification do
@@ -688,8 +704,9 @@ Rails.application.routes.draw do
     resource :mission, only: [ :create, :destroy ], module: :projects, controller: "missions"
     resource :magic, only: [ :create, :destroy ], module: :projects, controller: "magic"
     resources :mission_section_completions,
-              only: [ :create ],
-              module: :projects
+              only: [ :create, :destroy ],
+              module: :projects,
+              param: :mission_step_id
     member do
       get :readme
       post :follow
@@ -741,24 +758,6 @@ Rails.application.routes.draw do
       post :reject
       post :undo
       get  :redeem
-    end
-  end
-
-  # Owner-managed mission CRUD.
-  namespace :manage do
-    resources :missions, param: :slug, only: [ :show, :edit, :update ] do
-      member do
-        post :preview_guide
-        post :paste_guide
-      end
-      resources :steps,        only: [ :create, :update, :destroy ], controller: "mission_steps" do
-        collection do
-          post :reorder
-        end
-      end
-      resources :prizes,       only: [ :create, :update, :destroy ], controller: "mission_prizes"
-      resources :memberships,  only: [ :create, :update, :destroy ], controller: "mission_memberships"
-      resources :shop_unlocks, only: [ :create, :destroy ],          controller: "mission_shop_unlocks"
     end
   end
 

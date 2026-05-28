@@ -1,9 +1,6 @@
 module Admin
   class MissionsController < Admin::ApplicationController
-    # Use the standard Stardance app layout for missions admin so the page
-    # matches the rest of the site (sidebar, dark surface, brand chrome).
-    # Other admin sections still inherit the tan kitchen layout via
-    # Admin::ApplicationController.
+    # Override the default tan kitchen layout from Admin::ApplicationController.
     layout "application"
 
     before_action :set_body_class
@@ -12,10 +9,8 @@ module Admin
     def index
       authorize Mission
 
-      # Default scope excludes soft-deleted; only the "deleted" filter opts in.
       scope = case params[:filter]
       when "active"
-                # Enabled, started, not yet ended, not deleted.
                 Mission.where(enabled: true)
                        .where("start_at IS NULL OR start_at <= ?", Time.current)
                        .where("end_at IS NULL OR end_at > ?", Time.current)
@@ -36,18 +31,14 @@ module Admin
       authorize @mission
     end
 
-    # New missions are created as disabled drafts with only the bare minimum
-    # set (slug/name/description). Everything else — guide, prizes, reviewers,
-    # default project copy, schedule, achievement, icon, banner — is filled
-    # in on the manage page, which admins can always access. Redirecting
-    # straight there cuts the create flow down to "claim a slug, then edit
-    # like any other mission."
+    # New missions are disabled drafts — everything beyond slug/name/description
+    # is configured on the edit page after the redirect.
     def create
-      @mission = Mission.new(mission_params.merge(enabled: false))
+      @mission = Mission.new(create_params.merge(enabled: false))
       authorize @mission
 
       if @mission.save
-        redirect_to edit_manage_mission_path(@mission.slug),
+        redirect_to edit_admin_mission_path(@mission.slug),
                     notice: "Draft mission created — configure it below, then flip Enabled when it's ready."
       else
         render :new, status: :unprocessable_entity
@@ -62,32 +53,24 @@ module Admin
       child_versions = child_audit_versions
       @versions = mission_versions.or(child_versions).order(created_at: :desc).limit(50)
 
-      # Resolve whodunnit ids to a {id => User} map so the audit log shows
-      # display names instead of bare numeric ids.
       whodunnit_ids = @versions.pluck(:whodunnit).compact.uniq
       @whodunnit_users = User.where(id: whodunnit_ids).index_by { |u| u.id.to_s }
     end
 
     def edit
-      authorize @mission
-
-      # Admin edit is intentionally minimal: slug, owner assignment, and
-      # delete/restore. All mission content (title, description, guide,
-      # prizes, reviewers, shop unlocks, default project copy, etc.) is
-      # edited via the manage surface, which admins can access via Pundit's
-      # `manage?` policy.
-      @owners = @mission.memberships
-                        .where(role: Mission::Membership.roles[:owner])
-                        .includes(:user)
-                        .order(:created_at)
+      # /admin/missions/:slug/edit is shared with non-admin mission owners
+      # via MissionPolicy#manage? — use the plain (non-namespaced) policy so
+      # owners pass; the rest of the actions stay admin-only via Admin::MissionPolicy.
+      authorize @mission, :manage?, policy_class: MissionPolicy
+      load_edit_locals
     end
 
     def update
-      authorize @mission
-
-      if @mission.update(update_params)
-        redirect_to admin_mission_path(@mission.slug), notice: "Mission slug updated."
+      authorize @mission, :manage?, policy_class: MissionPolicy
+      if @mission.update(mission_params)
+        redirect_to edit_admin_mission_path(@mission.slug), notice: "Mission updated."
       else
+        load_edit_locals
         render :edit, status: :unprocessable_entity
       end
     end
@@ -114,9 +97,29 @@ module Admin
       @mission = Mission.with_deleted.find_by!(slug: params[:slug])
     end
 
-    # PaperTrail's versions.item_id is a varchar. Keep each child id list
-    # paired with its item_type so overlapping ids from another mission's
-    # child table cannot leak into this audit feed.
+    def load_edit_locals
+      @current_language    = @mission.resolve_storage_language(params[:language].presence)
+      @available_languages = @mission.available_languages
+
+      # body_for is .detect-based; preloading :bodies turns the per-step
+      # body lookup into one SELECT + in-memory pick instead of N queries.
+      @steps       = @mission.steps.where(deleted_at: nil).ordered.includes(:bodies)
+      @prizes      = @mission.prizes.ordered.includes(:shop_item)
+      @memberships = @mission.memberships.includes(:user).order(:role, :id)
+      @unlocks     = @mission.shop_unlocks.includes(:shop_item)
+
+      # Admin-only sections (slug / owner CRUD / danger zone) render on the
+      # same edit page. Preload the owner list when the viewer can see them.
+      if policy(@mission).manage_owners?
+        @owners = @mission.memberships
+                          .where(role: Mission::Membership.roles[:owner])
+                          .includes(:user)
+                          .order(:created_at)
+      end
+    end
+
+    # versions.item_id is a varchar — pair each id list with its item_type so
+    # ids from a sibling child table can't leak in.
     def child_audit_versions
       scopes = {
         "Mission::GuideVariant" => @mission.guide_variants.pluck(:id),
@@ -132,15 +135,21 @@ module Admin
       scopes.reduce(PaperTrail::Version.none) { |query, scope| query.or(scope) }
     end
 
-    # Create permits only the three required fields — everything else is
-    # configured on the manage page after the draft exists. Update permits
-    # only the slug (admin's one prerogative the manage page doesn't offer).
-    def mission_params
+    def create_params
       params.require(:mission).permit(:slug, :name, :description)
     end
 
-    def update_params
-      params.require(:mission).permit(:slug)
+    # :slug stays admin-only — public URL changes are admin-prerogative.
+    def mission_params
+      permitted = [
+        :name, :description, :difficulty, :submission_guide,
+        :enabled, :start_at, :end_at, :featured_at,
+        :achievement_name, :achievement_description, :icon, :banner,
+        :estimated_completion_minutes,
+        :default_project_title, :default_project_description
+      ]
+      permitted << :slug if policy(@mission).manage_owners?
+      params.require(:mission).permit(*permitted)
     end
   end
 end

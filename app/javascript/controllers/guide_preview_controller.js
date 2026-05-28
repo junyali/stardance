@@ -1,12 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 
-// Live preview for mission guide_body / submission_guide textareas. Posts the
-// markdown to a manage-side endpoint that runs the same renderer the public
-// page uses, so authors see shortcodes and sanitization exactly as users
-// will. Debounced to avoid hammering the server on every keystroke.
-//
-// The endpoint caps input at 100 KB and returns 413; we treat that as a
-// no-op so the previous preview stays in place.
+// Debounced live preview for the manage-side guide textarea. The endpoint
+// returns 413 above 100KB; that's treated as a no-op (keep prior preview).
 export default class extends Controller {
   static targets = ["input", "preview"];
   static values = { url: String };
@@ -47,8 +42,6 @@ export default class extends Controller {
           html ||
           '<span class="guide-preview__empty">Preview will appear here…</span>';
       }
-    } catch (_e) {
-      // Network errors leave the previous preview in place.
-    }
+    } catch (_e) {}
   }
 }

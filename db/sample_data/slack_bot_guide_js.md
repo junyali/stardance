@@ -260,9 +260,6 @@ app.command("/command-name", async ({ ack, respond }) => {
 `ack()` is required, and it needs to run within ~3 seconds. If you don't acknowledge in time, Slack thinks the command failed and shows the user an error.
 :::
 
-:::checkpoint label="Locally working"
-:::
-
 ---
 
 ## Add more commands
@@ -359,9 +356,6 @@ You can repeat this pattern for as many commands as you want. Just remember to r
 
 * APIs have rate limits — always use `try/catch` so a failed request doesn't crash your bot.
 * Some APIs require authentication — put their API keys in `.env`, never in your code.
-:::
-
-:::checkpoint label="Commands extended"
 :::
 
 ---
@@ -480,9 +474,6 @@ Without systemd, your bot stops when you disconnect SSH, when Nest restarts, or 
    ```
 
 Congratulations — your bot is now running 24/7!
-
-:::checkpoint label="Running 24/7"
-:::
 
 ---
 

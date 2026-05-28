@@ -21,8 +21,6 @@ class MissionsController < ApplicationController
                              .limit(8)
   end
 
-  # Mission home — overview, stats, prizes summary, gallery, and a CTA into
-  # the guide subpage.
   def show
     authorize @mission
     @ordered_prizes       = @mission.prizes.ordered.includes(:shop_item).to_a
@@ -35,7 +33,6 @@ class MissionsController < ApplicationController
     @progress_state       = compute_progress_state(@mission, @active_project, @guide_outline)
   end
 
-  # Mission guide subpage — full markdown content with sticky progress sidebar.
   def guide
     authorize @mission
     @available_languages = @mission.available_languages
@@ -63,10 +60,6 @@ class MissionsController < ApplicationController
     @mission = Mission.find_by!(slug: params[:slug])
   end
 
-  # Returns a Symbol: :not_started, :in_progress, :in_review, :in_voting,
-  # or :completed. Drives the status chip on the mission hero. Walks from
-  # "project attached" → "ship submitted" → "ship's review/voting/finished
-  # stage" rather than counting section checkmarks.
   def compute_progress_state(mission, project, _outline)
     return :not_started unless project
 
@@ -89,9 +82,6 @@ class MissionsController < ApplicationController
     end
   end
 
-  # Headline figures shown on the mission home. The "reviewed" count
-  # excludes submissions still in the queue — those are obvious from
-  # the queue itself.
   def mission_stats(mission)
     {
       reviewed_count:  mission.submissions.where.not(status: "awaiting_certification").count,

@@ -1,21 +1,8 @@
 import { Controller } from "@hotwired/stimulus";
 
-// Drives the mission guide subpage as a tabbed flow. Each step section becomes
-// its own tab; the sidebar outline doubles as tab control. Completion is
-// driven by an explicit "Mark this section done" button on each section.
-//
-// Sections are keyed on mission_step_id (a stable integer shared across every
-// language of the guide). When the user has an active project attached to
-// this mission, completions are persisted server-side. When the user is
-// signed out or has no project on this mission, the controller falls back
-// to versioned localStorage keyed on the mission slug alone (no language
-// partition — step ids are themselves shared).
-//
-// Tab activation sources, in order:
-//   - URL hash matching a section id (e.g. #step-42)
-//   - User clicks an outline link
-//   - User clicks the prev/next nav at the bottom of a section
-//   - Default: the first section
+// Tabbed mission-guide flow. Sections are keyed on mission_step_id (shared
+// across languages); completions persist remotely when a project is attached,
+// otherwise to versioned localStorage.
 export default class extends Controller {
   static targets = ["outlineItem", "progressBar", "completedCount"];
   static values = {
@@ -32,7 +19,6 @@ export default class extends Controller {
       document.querySelectorAll("section.guide-section[data-mission-step-id]"),
     );
 
-    // Completion set holds mission_step_id values as numbers.
     this.completed = new Set(
       (this.completedStepIdsValue || []).map((id) => Number(id)),
     );
@@ -71,10 +57,6 @@ export default class extends Controller {
     }
   }
 
-  // ---- Storage helpers ----------------------------------------------------
-
-  // Step ids are shared across languages, so the storage key doesn't need a
-  // language partition — completion in JS == completion in Python.
   storageKey() {
     const slug = this.hasMissionSlugValue ? this.missionSlugValue : "_";
     return `stardance:v1:mission-progress:${slug}`;
@@ -88,9 +70,7 @@ export default class extends Controller {
       if (Array.isArray(data.stepIds)) {
         data.stepIds.forEach((id) => this.completed.add(Number(id)));
       }
-    } catch {
-      // fail silent — quota or parse problem, just skip hydration
-    }
+    } catch {}
   }
 
   persistToLocalStorage() {
@@ -99,12 +79,8 @@ export default class extends Controller {
         this.storageKey(),
         JSON.stringify({ stepIds: Array.from(this.completed) }),
       );
-    } catch {
-      // fail silent
-    }
+    } catch {}
   }
-
-  // ---- Activation (tab swap) ----------------------------------------------
 
   bindOutlineClicks() {
     this.outlineItemTargets.forEach((item) => {
@@ -172,8 +148,6 @@ export default class extends Controller {
     this.renderProgress();
   }
 
-  // ---- Progress rendering -------------------------------------------------
-
   stepIdFor(section) {
     if (!section) return null;
     const raw = section.dataset.missionStepId;
@@ -214,13 +188,7 @@ export default class extends Controller {
     }
   }
 
-  // ---- Mark-complete persistence -----------------------------------------
-
-  // Apply (or clear) a completion state for a section. Optimistic UI update
-  // with a rollback if the server rejects. Used both by the explicit
-  // "Mark this section done" button and by the prev/next nav (which marks
-  // the section being left complete when moving forward, incomplete when
-  // moving backward).
+  // Optimistic completion toggle with rollback on server reject.
   setSectionState(stepId, desired) {
     const wasComplete = this.completed.has(stepId);
     if (wasComplete === desired) return;
@@ -248,37 +216,34 @@ export default class extends Controller {
   async persistRemote({ stepId, desired }) {
     const tokenEl = document.querySelector('meta[name="csrf-token"]');
     const token = tokenEl?.getAttribute("content") || "";
-    const body = {
-      mission_step_id: stepId,
-      completed: desired,
-    };
-    const response = await fetch(this.createUrlValue, {
-      method: "POST",
+
+    const url = desired
+      ? this.createUrlValue
+      : `${this.createUrlValue.replace(/\/$/, "")}/${stepId}`;
+
+    const init = {
+      method: desired ? "POST" : "DELETE",
       credentials: "same-origin",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
         "X-CSRF-Token": token,
       },
-      body: JSON.stringify(body),
-    });
+    };
+    if (desired) init.body = JSON.stringify({ mission_step_id: stepId });
+
+    const response = await fetch(url, init);
     if (!response.ok) {
       throw new Error(`Server responded ${response.status}`);
     }
   }
-
-  // ---- DOM injection ------------------------------------------------------
 
   injectPrevNext() {
     this.sections.forEach((section) => {
       const idx = Number(section.dataset.sectionIndex);
       if (Number.isNaN(idx)) return;
 
-      // Strip trailing <hr>s so the section doesn't render a horizontal
-      // rule butting up against the prev/next nav's own border-top.
-      // The body is wrapped in `<div class="guide-content">`, so the
-      // trailing HR sits one level inside the section — walk into the
-      // wrapper to find it.
+      // Strip trailing HRs so they don't butt against the nav's border-top.
       const stripTrailingHrs = (root) => {
         let candidate = root.lastElementChild;
         while (candidate && candidate.tagName === "HR") {
@@ -338,14 +303,12 @@ export default class extends Controller {
     button.appendChild(title);
     button.addEventListener("click", () => {
       if (direction === "next") {
-        // Forward: mark the section being LEFT as done.
         const current = this.sections.find(
           (s) => Number(s.dataset.sectionIndex) === this.activeIndex,
         );
         const currentStepId = current ? this.stepIdFor(current) : null;
         if (currentStepId !== null) this.setSectionState(currentStepId, true);
       } else {
-        // Backward: mark the section being navigated TO as not done.
         const destStepId = this.stepIdFor(target);
         if (destStepId !== null) this.setSectionState(destStepId, false);
       }

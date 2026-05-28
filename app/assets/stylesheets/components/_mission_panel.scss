@@ -1,7 +1,3 @@
-// Mission panel — rendered on the project show page when a mission is
-// attached. Loose missions render the description; guided missions get a
-// step-tracker.
-
 .mission-panel {
   padding: var(--space-l);
   border-radius: 14px;
@@ -197,7 +193,6 @@
   cursor: pointer;
 }
 
-// Guide progress (replaces the step-tracking UI for guide-based missions).
 .mission-panel__progress {
   margin-top: var(--space-m);
   display: flex;

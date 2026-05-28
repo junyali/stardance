@@ -1,68 +1,164 @@
-<% content_for :title, "Admin · Edit #{@mission.name}" %>
+<% content_for :title, "Manage #{@mission.name}" %>
 
-<div class="app-layout app-layout--wide">
-  <div class="app-layout__main app-layout__main--wide">
-    <article class="admin-mission">
-      <p class="admin-mission__breadcrumb">
-        <%= link_to "← #{@mission.name}", admin_mission_path(@mission.slug), class: "admin-mission__breadcrumb-link" %>
+<div class="app-layout" data-controller="scroll-restore">
+  <div class="app-layout__main">
+    <header class="admin-mission-edit__header">
+      <p class="admin-mission-edit__breadcrumb">
+        <%= link_to "Mission", mission_path(@mission.slug) %>
+        <% if policy(@mission).manage_owners? %>
+          <span aria-hidden="true">·</span>
+          <%= link_to "Admin", admin_mission_path(@mission.slug) %>
+        <% end %>
       </p>
+      <h1>Manage <%= @mission.name %></h1>
+    </header>
 
-      <header class="admin-mission__page-header">
-        <h1 class="admin-mission__page-title">Edit <%= @mission.name %></h1>
-      </header>
+    <section class="admin-mission-edit__section">
+      <h2 class="admin-mission-edit__section-title">Mission details</h2>
+      <%= form_with model: @mission, url: admin_mission_path(@mission.slug), method: :patch, local: true, multipart: true, class: "admin-mission-edit__form" do |f| %>
+        <label>Name <%= f.text_field :name, required: true %></label>
+        <label>Description (markdown) <%= f.text_area :description, rows: 4 %></label>
 
-      <section class="admin-mission__section">
-        <h2 class="admin-mission__section-title">Mission settings</h2>
-        <p class="admin-mission__hint">
-          The admin page only edits the slug. Everything else (title, description,
-          guide, prizes, memberships, shop unlocks, default project copy, etc.) lives
-          on the manage page — admins have access there too.
-        </p>
-        <div class="admin-mission__actions">
-          <%= link_to "Manage this mission →",
-                      edit_manage_mission_path(@mission.slug),
-                      class: "action-btn action-btn--large action-btn--primary" %>
+        <label>
+          Default project name
+          <small class="admin-mission-edit__hint">
+            Builders who click "Create a project" on this mission get a fresh
+            project with this name pre-filled. Leave blank to default to the
+            mission's name above.
+          </small>
+          <%= f.text_field :default_project_title, placeholder: @mission.name %>
+        </label>
+
+        <label>
+          Default project description
+          <small class="admin-mission-edit__hint">
+            Pre-fills the builder's new project description. Leave blank to
+            leave the description empty.
+          </small>
+          <%= f.text_area :default_project_description, rows: 3 %>
+        </label>
+
+        <div class="admin-mission-edit__guide-editor"
+             data-controller="guide-preview"
+             data-guide-preview-url-value="<%= admin_mission_guide_preview_path(@mission.slug) %>">
+          <label>
+            Submission guide (markdown)
+            <small class="admin-mission-edit__hint">
+              Tells builders what reviewers look for, and reminds reviewers of the
+              mission-specific rubric. Shown on the mission home page, the ship
+              form (as an acknowledgment), and the reviewer's submission detail.
+            </small>
+            <%= f.text_area :submission_guide, rows: 8,
+                  data: { guide_preview_target: "input", action: "input->guide-preview#update" } %>
+          </label>
+          <div class="admin-mission-edit__guide-preview">
+            <p class="admin-mission-edit__guide-preview-label">Live preview</p>
+            <%# Wrap the preview in mission-home__requirements so the
+                numbered criterion cards + intro/outro inherit the same
+                styling they get on the public mission page. %>
+            <div class="mission-home__requirements" data-guide-preview-target="preview"></div>
+          </div>
         </div>
-      </section>
 
-      <section class="admin-mission__section">
-        <h2 class="admin-mission__section-title">Slug</h2>
-        <p class="admin-mission__hint">
+        <label>Difficulty
+          <%= f.select :difficulty, Mission::DIFFICULTIES.map { |d| [ d.titleize, d ] }, include_blank: "—" %>
+        </label>
+        <label>
+          Estimated completion (minutes)
+          <small class="admin-mission-edit__hint">
+            Roughly how long a beginner should expect to spend. Optional —
+            leave blank to hide the time chip on the mission page.
+          </small>
+          <%= f.number_field :estimated_completion_minutes, min: 5, max: 480, step: 5 %>
+        </label>
+        <label class="is-inline"><%= f.check_box :enabled %> Enabled</label>
+        <label>Start at <%= f.datetime_field :start_at %></label>
+        <label>End at <%= f.datetime_field :end_at %></label>
+        <label>Featured at <%= f.datetime_field :featured_at %></label>
+        <label>Achievement name <%= f.text_field :achievement_name %></label>
+        <label>Achievement description <%= f.text_field :achievement_description %></label>
+
+        <div class="admin-mission-edit__image-field">
+          <span class="admin-mission-edit__image-field-label">Icon</span>
+          <%= render StarImageInputComponent.new(
+                name: "mission[icon]",
+                id: "mission_icon",
+                accept: "image/*",
+                current_url: (url_for(@mission.icon) if @mission.icon.attached?),
+                current_alt: @mission.icon.attached? ? "Current icon" : "",
+                primary_text: "Drag the mission icon",
+                secondary_text: "or click to choose a file"
+              ) %>
+        </div>
+
+        <div class="admin-mission-edit__image-field">
+          <span class="admin-mission-edit__image-field-label">Banner</span>
+          <%= render StarImageInputComponent.new(
+                name: "mission[banner]",
+                id: "mission_banner",
+                accept: "image/*",
+                current_url: (url_for(@mission.banner) if @mission.banner.attached?),
+                current_alt: @mission.banner.attached? ? "Current banner" : "",
+                primary_text: "Drag the mission banner",
+                secondary_text: "or click to choose a file"
+              ) %>
+        </div>
+        <%= f.submit "Save details", class: "action-btn action-btn--large action-btn--primary" %>
+      <% end %>
+    </section>
+
+    <%# Each of the next four sections lives in its own Turbo Frame, so
+        adding/removing/reordering inside them updates that frame in place
+        without a full page reload. The main mission-details form above
+        does a normal POST + redirect because state preservation isn't
+        needed there. %>
+    <%= render "admin/missions/steps_frame",
+          mission: @mission, steps: @steps,
+          current_language: @current_language,
+          available_languages: @available_languages %>
+
+    <%= render "admin/missions/prizes_frame",
+          mission: @mission, prizes: @prizes %>
+
+    <%= render "admin/missions/reviewers_frame",
+          mission: @mission, memberships: @memberships %>
+
+    <%= render "admin/missions/shop_unlocks_frame",
+          mission: @mission, unlocks: @unlocks %>
+
+    <% if policy(@mission).manage_owners? %>
+      <%# Admin-only sections — slug rename, owner add/remove, danger zone.
+          Non-admin mission owners can't see any of this; they manage the
+          mission content above and stop there. %>
+      <section class="admin-mission-edit__section admin-mission-edit__section--admin">
+        <h2 class="admin-mission-edit__section-title">Slug <span class="admin-mission-edit__admin-tag">admin</span></h2>
+        <p class="admin-mission-edit__hint">
           Renaming the slug changes the public URL. Existing links to
-          <code class="admin-mission__code">/missions/<%= @mission.slug %></code>
+          <code class="admin-mission-edit__code">/missions/<%= @mission.slug %></code>
           will 404 after this change.
         </p>
         <%= form_with model: @mission, url: admin_mission_path(@mission.slug), method: :patch,
-              local: true, class: "admin-mission__form" do |f| %>
-          <% if @mission.errors.any? %>
-            <div class="admin-mission__errors">
-              <ul>
-                <% @mission.errors.full_messages.each do |msg| %>
-                  <li><%= msg %></li>
-                <% end %>
-              </ul>
-            </div>
-          <% end %>
-          <label class="admin-mission__field">
-            <span class="admin-mission__field-label">Slug</span>
-            <%= f.text_field :slug, required: true %>
+              local: true, class: "admin-mission-edit__form" do |f| %>
+          <label>
+            Slug
+            <%= f.text_field :slug, required: true, value: @mission.slug %>
           </label>
           <%= f.submit "Update slug", class: "action-btn action-btn--small action-btn--primary" %>
         <% end %>
       </section>
 
-      <section class="admin-mission__section">
-        <h2 class="admin-mission__section-title">Owners</h2>
-        <p class="admin-mission__hint">
-          Owners can manage the mission via the manage page (edit content,
-          add reviewers, configure prizes, etc.). Only admins can grant or
-          revoke ownership.
+      <section class="admin-mission-edit__section admin-mission-edit__section--admin">
+        <h2 class="admin-mission-edit__section-title">Owners <span class="admin-mission-edit__admin-tag">admin</span></h2>
+        <p class="admin-mission-edit__hint">
+          Owners can manage the mission (edit content, add reviewers,
+          configure prizes, etc.) without needing admin. Only admins can
+          grant or revoke ownership.
         </p>
         <% if @owners.any? %>
-          <ul class="admin-mission__list">
+          <ul class="admin-mission-edit__memberships">
             <% @owners.each do |m| %>
-              <li>
-                <span><%= m.user.display_name %> <span class="admin-mission__muted">(#<%= m.user.id %>)</span></span>
+              <li class="admin-mission-edit__membership">
+                <span><%= m.user.display_name %> <span class="admin-mission-edit__muted">(#<%= m.user.id %>)</span></span>
                 <%= button_to "Remove",
                               admin_mission_membership_path(@mission.slug, m),
                               method: :delete,
@@ -72,21 +168,21 @@
             <% end %>
           </ul>
         <% else %>
-          <p class="admin-mission__empty">No owners yet. Add one so this mission can be managed without admin.</p>
+          <p class="admin-mission-edit__empty">No owners yet. Add one so this mission can be managed without admin.</p>
         <% end %>
-        <%= form_with url: admin_mission_memberships_path(@mission.slug), method: :post, local: true, class: "admin-mission__form" do %>
-          <label class="admin-mission__field">
-            <span class="admin-mission__field-label">User ID or Slack ID</span>
+        <%= form_with url: admin_mission_memberships_path(@mission.slug), method: :post, local: true, class: "admin-mission-edit__form" do %>
+          <%= hidden_field_tag "mission_membership[role]", "owner" %>
+          <label>User ID or Slack ID
             <%= text_field_tag "mission_membership[user_id]", nil, required: true, autocomplete: "off" %>
           </label>
           <%= submit_tag "Add owner", class: "action-btn action-btn--small action-btn--primary" %>
         <% end %>
       </section>
 
-      <section class="admin-mission__section">
-        <h2 class="admin-mission__section-title">Danger zone</h2>
+      <section class="admin-mission-edit__section admin-mission-edit__section--admin">
+        <h2 class="admin-mission-edit__section-title">Danger zone <span class="admin-mission-edit__admin-tag">admin</span></h2>
         <% if @mission.deleted_at? %>
-          <p class="admin-mission__hint">
+          <p class="admin-mission-edit__hint">
             This mission is soft-deleted (since <%= @mission.deleted_at.to_date %>).
             Restore to make it visible again.
           </p>
@@ -95,7 +191,7 @@
                         method: :post,
                         class: "action-btn action-btn--small action-btn--primary" %>
         <% else %>
-          <p class="admin-mission__hint">
+          <p class="admin-mission-edit__hint">
             Soft-deletes the mission. It disappears from the public listing
             and project picker but stays in the database, so this can be
             undone with Restore.
@@ -107,6 +203,6 @@
                         class: "action-btn action-btn--small action-btn--destructive" %>
         <% end %>
       </section>
-    </article>
+    <% end %>
   </div>
 </div>

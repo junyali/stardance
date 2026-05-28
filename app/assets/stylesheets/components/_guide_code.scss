@@ -1,9 +1,4 @@
-// Rouge syntax-highlight theme for guide code blocks. Maps the rouge token
-// classes onto Stardance brand tokens so code blocks feel brand-native on
-// the dark space backdrop.
-//
-// Block element = .guide-code (set by GuideMarkdownRenderer#render_code_block).
-// Token classes come from rouge — see https://rouge-ruby.github.io/docs/.
+// Rouge syntax-highlight theme. Token class reference: https://rouge-ruby.github.io/docs/
 
 .guide-code {
   background: var(--color-space-bg-2);

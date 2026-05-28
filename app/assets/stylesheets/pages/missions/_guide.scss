@@ -1,7 +1,3 @@
-// Mission guide subpage — the full markdown content with a sticky progress
-// sidebar. Section bodies render via .guide-content (components/_guide_content).
-// BEM block = .mission-guide.
-
 .mission-guide {
   margin: var(--space-l) 0 var(--space-xxl);
 }
@@ -215,14 +211,11 @@
   text-align: center;
 }
 
-// Tab mode — hide non-active sections when the JS controller is wired up.
-// The selector chain stays scoped to the guide subpage so the static guide
-// previews on admin/manage show pages still show all sections at once.
+// Scope to .mission-guide so admin/manage static previews still show all sections.
 .mission-guide .guide-section--hidden {
   display: none;
 }
 
-// Prev/next footer the Stimulus controller appends to each section.
 .mission-guide__step-nav {
   display: flex;
   align-items: stretch;
@@ -279,8 +272,6 @@
   color: var(--color-space-text);
 }
 
-// Print: hide chrome, expand layout, force readable colors, and undo the
-// tab-mode section hiding so the whole guide prints as one document.
 @media print {
   .mission-guide__sidebar,
   .mission-guide__breadcrumb,

@@ -29,17 +29,11 @@ class Mission::Step < ApplicationRecord
 
   belongs_to :mission, inverse_of: :steps, counter_cache: true
 
-  # Rails' counter_cache only fires on create / destroy, never on update.
-  # Without these callbacks soft-deletes leave missions.steps_count inflated
-  # forever (the backfill migration's mass `update_all(deleted_at:)` also
-  # caused permanent drift on any mission that had translated steps).
+  # counter_cache only fires on create/destroy — soft-deletes need a manual bump.
   after_update :adjust_steps_counter_on_soft_delete, if: :saved_change_to_deleted_at?
 
-  # Companion to the counter-cache callback: the FK on
-  # mission_section_completions is ON DELETE CASCADE and the has_many is
-  # dependent: :destroy, but neither fires on soft-delete (it's just an
-  # UPDATE). Without this, completion rows orphan against a soft-deleted
-  # step and would silently resurrect if the step is ever un-soft-deleted.
+  # ON DELETE CASCADE / dependent: :destroy don't fire on soft-delete — without
+  # this, completion rows would resurrect if a step is ever un-soft-deleted.
   after_update :cleanup_section_completions_on_soft_delete, if: :saved_change_to_deleted_at?
 
   private
@@ -75,21 +69,13 @@ class Mission::Step < ApplicationRecord
 
   scope :ordered, -> { order(:position, :id) }
 
-  # The per-language body for this step. nil if no content has been authored
-  # in this language yet — callers should fall back to a placeholder.
-  #
-  # Uses .detect rather than .find_by so that callers who `includes(:bodies)`
-  # actually hit the preloaded association cache instead of issuing N+1.
+  # .detect (not find_by) so includes(:bodies) hits the preloaded cache.
   def body_for(language)
     return nil if language.blank?
     target = language.to_s.downcase
     bodies.detect { |b| b.language.to_s.downcase == target }&.body
   end
 
-  # Upsert the body for a given language. Updates the existing StepBody when
-  # one already exists (case-insensitively) for this language; otherwise
-  # creates a new one. Skips the UPDATE when the body string is unchanged
-  # (avoids touching body_updated_at and writing empty audit rows).
   def upsert_body_for!(language, body)
     return if language.blank?
     target = language.to_s.downcase

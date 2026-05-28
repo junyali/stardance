@@ -1,11 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 
-// HTML5 native drag-and-drop reordering, gated by a drag handle. Each list
-// item defaults to draggable=false; mousedown on an element marked with
-// `data-sortable-handle` flips that item to draggable=true for the duration
-// of the press. On drop, the new ID order is POSTed to the URL supplied via
-// `data-sortable-url-value`. Idempotent — the server stamps `position` to
-// match the array order.
+// Native HTML5 drag-reorder gated by a `data-sortable-handle` element so plain
+// row clicks don't start drags. POSTs the new id order to `urlValue` on drop.
 export default class extends Controller {
   static targets = ["item"];
   static values = { url: String };
@@ -33,8 +29,6 @@ export default class extends Controller {
   }
 
   wireItem(item) {
-    // Default to not-draggable so plain row clicks (Edit, Delete) don't
-    // accidentally initiate a drag.
     item.setAttribute("draggable", "false");
 
     item.addEventListener("dragstart", this.onDragStart);
@@ -57,12 +51,10 @@ export default class extends Controller {
   }
 
   disarm() {
-    // Delay the disarm until after dragstart has a chance to fire (some
-    // browsers re-check the draggable attribute mid-gesture).
+    // Defer disarm so dragstart still fires in browsers that re-check
+    // draggable mid-gesture, and click-without-drag still ends as not-draggable.
     if (this.armedItem && !this.dragging) {
       const target = this.armedItem;
-      // Defer one tick so a click-without-drag (mousedown then mouseup
-      // without movement) still ends with draggable=false.
       setTimeout(() => {
         if (target !== this.dragging) target.setAttribute("draggable", "false");
       }, 0);
@@ -125,9 +117,6 @@ export default class extends Controller {
         "X-CSRF-Token": tokenEl?.getAttribute("content") || "",
       },
       body: JSON.stringify({ order: order }),
-    }).catch(() => {
-      // Optimistic — leave the DOM order; next page reload repaints from
-      // the server.
-    });
+    }).catch(() => {});
   }
 }

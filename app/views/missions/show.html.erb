@@ -17,7 +17,7 @@
           <%= link_to "Missions", missions_path, class: "mission-home__crumb-link" %>
           <% if policy(@mission).manage? %>
             <span class="mission-home__crumb-dot" aria-hidden="true">·</span>
-            <%= link_to "Manage", edit_manage_mission_path(@mission.slug), class: "mission-home__crumb-link" %>
+            <%= link_to "Manage", edit_admin_mission_path(@mission.slug), class: "mission-home__crumb-link" %>
           <% end %>
         </span>
       </p>
