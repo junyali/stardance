@@ -17,13 +17,9 @@ module Admin
         @mission = Mission.find_by!(slug: slug)
       end
 
-      # Non-admin mission owners can reach these admin-URL'd sub-resource
-      # controllers. Use the top-level ::MissionPolicy explicitly — bare
-      # `MissionPolicy` would resolve to the admin-namespaced policy here.
-      # skip_authorization satisfies the controller's `verify_authorized`.
+      # Admin::MissionPolicy#manage? allows non-admin mission owners through.
       def authorize_mission_management
-        raise Pundit::NotAuthorizedError unless ::MissionPolicy.new(current_user, @mission).manage?
-        skip_authorization
+        authorize @mission, :manage?
       end
     end
   end
