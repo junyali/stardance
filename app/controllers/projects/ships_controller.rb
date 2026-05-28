@@ -53,6 +53,9 @@ class Projects::ShipsController < ApplicationController
       flash.now[:warning] = "Your README link doesn't appear to be a raw GitHub URL. We require raw README files (from raw.githubusercontent.com) for proper display and consistency. Please update your README URL."
     end
 
+    reship = had_prior_ship_event?
+    probe_result = reship ? ProjectUrlProbeService.new(@project).call : nil
+
     @project.with_lock do
       @project.submit_for_review!
       ship_event = Post::ShipEvent.create!(
@@ -61,13 +64,20 @@ class Projects::ShipsController < ApplicationController
       )
       @post = @project.posts.create!(user: current_user, postable: ship_event)
       maybe_create_mission_submission(ship_event, mission_payout_path, submission_guide_ack)
+      maybe_create_ysws_review(ship_event)
     end
 
-    if initial_ship?
+    if !reship
       redirect_to project_path(@project), notice: "Congratulations! Your project has been submitted for review!"
-    else
+    elsif probe_result.ok?
       @post.postable.update!(certification_status: "approved")
       redirect_to project_path(@project), notice: "Ship submitted! Your project is now out for voting."
+    else
+      @project.ship_reviews.pending.first&.update!(
+        status: :returned,
+        feedback: "Automated URL check failed: #{probe_result.failures.join('; ')}. Fix and re-ship."
+      )
+      redirect_to project_path(@project), notice: "Your project needs changes. We couldn't reach your demo or repo. Fix those and re-ship."
     end
   rescue ActiveRecord::RecordInvalid => e
     redirect_back fallback_location: new_project_ships_path(@project), alert: e.record.errors.full_messages.to_sentence
@@ -96,6 +106,10 @@ class Projects::ShipsController < ApplicationController
 
     def initial_ship?
       @project.posts.where(postable_type: "Post::ShipEvent").one?
+    end
+
+    def had_prior_ship_event?
+      @project.posts.where(postable_type: "Post::ShipEvent").exists?
     end
 
     def mission_submission_guide_ack_required?
@@ -132,6 +146,33 @@ class Projects::ShipsController < ApplicationController
         .joins(ship_event: { post: :user })
         .where(users: { id: current_user.id })
         .where.not(shop_order_id: nil)
+        .exists?
+    end
+
+    def maybe_create_ysws_review(ship_event)
+      # Only create review if this is NOT the first ship (i.e., there are previous approved ships)
+      return unless has_previous_approved_ships?
+
+      # Calculate hours worked between ships and convert to minutes
+      hours_worked = ship_event.hours || 0
+      original_minutes = (hours_worked * 60).to_i
+
+      Certification::Ysws.create!(
+        user: current_user,
+        project: @project,
+        post_ship_event: ship_event,
+        ship_cert_id: nil, # Will be set later when this ship is certified
+        original_minutes: original_minutes,
+        approved_minutes: nil, # Will be set by reviewer
+        reviewed_at: nil, # Will be set when reviewed
+        reviewer_id: nil # Will be assigned by admin
+      )
+    end
+
+    def has_previous_approved_ships?
+      @project.posts
+        .joins("INNER JOIN post_ship_events ON posts.postable_id = post_ship_events.id AND posts.postable_type = 'Post::ShipEvent'")
+        .where(post_ship_events: { certification_status: "approved" })
         .exists?
     end
 end

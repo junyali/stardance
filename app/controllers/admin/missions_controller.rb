@@ -10,6 +10,8 @@ module Admin
     before_action :set_mission, only: [ :show, :edit, :update, :destroy, :restore ]
 
     def index
+      authorize Mission
+
       # Default scope excludes soft-deleted; only the "deleted" filter opts in.
       scope = case params[:filter]
       when "active"
@@ -31,6 +33,7 @@ module Admin
 
     def new
       @mission = Mission.new
+      authorize @mission
     end
 
     # New missions are created as disabled drafts with only the bare minimum
@@ -41,6 +44,8 @@ module Admin
     # like any other mission."
     def create
       @mission = Mission.new(mission_params.merge(enabled: false))
+      authorize @mission
+
       if @mission.save
         redirect_to edit_manage_mission_path(@mission.slug),
                     notice: "Draft mission created — configure it below, then flip Enabled when it's ready."
@@ -50,6 +55,7 @@ module Admin
     end
 
     def show
+      authorize @mission
       @submissions = @mission.submissions.order(created_at: :desc).limit(50)
 
       mission_versions = PaperTrail::Version.where(item_type: "Mission", item_id: @mission.id.to_s)
@@ -63,6 +69,8 @@ module Admin
     end
 
     def edit
+      authorize @mission
+
       # Admin edit is intentionally minimal: slug, owner assignment, and
       # delete/restore. All mission content (title, description, guide,
       # prizes, reviewers, shop unlocks, default project copy, etc.) is
@@ -75,6 +83,8 @@ module Admin
     end
 
     def update
+      authorize @mission
+
       if @mission.update(update_params)
         redirect_to admin_mission_path(@mission.slug), notice: "Mission slug updated."
       else
@@ -83,11 +93,13 @@ module Admin
     end
 
     def destroy
+      authorize @mission
       @mission.update!(deleted_at: Time.current, enabled: false)
       redirect_to admin_missions_path, notice: "Mission soft-deleted."
     end
 
     def restore
+      authorize @mission, :restore?
       @mission.update!(deleted_at: nil)
       redirect_to admin_mission_path(@mission.slug), notice: "Mission restored."
     end

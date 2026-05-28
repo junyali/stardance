@@ -7,6 +7,7 @@ module Admin
     layout "application"
 
     before_action :set_mission
+    before_action :authorize_mission_update
     before_action :set_membership, only: [ :destroy ]
 
     def create
@@ -48,6 +49,10 @@ module Admin
 
     def set_mission
       @mission = Mission.find_by!(slug: params[:mission_slug])
+    end
+
+    def authorize_mission_update
+      authorize @mission, :update?
     end
 
     def set_membership

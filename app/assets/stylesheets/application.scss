@@ -62,3 +62,5 @@
 @use "pages/mission_submissions/index" as mission_submissions_index;
 @use "pages/mission_submissions/show" as mission_submissions_show;
 @use "pages/manage/missions_edit" as manage_missions_edit;
+@use "pages/certification/ships/index" as certification_ships_index;
+@use "pages/certification/ships/show" as certification_ships_show;
