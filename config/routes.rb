@@ -449,14 +449,6 @@ class AdminConstraint
   end
 end
 
-class HelperConstraint
-  def self.matches?(request)
-    u = User.find_by(id: request.session[:user_id])
-    u ||= User.find_by(id: ENV["DEV_ADMIN_USER_ID"]) if Rails.env.development?
-    u && HelperPolicy.new(u, :helper).access?
-  end
-end
-
 Rails.application.routes.draw do
   # Sitemap
   get "sitemap.xml", to: "sitemaps#index", as: :sitemap, defaults: { format: :xml }
@@ -570,21 +562,16 @@ Rails.application.routes.draw do
     post :name,                      to: "wizard#submit_name"
   end
 
-  namespace :helper, constraints: HelperConstraint do
-    root to: "application#index"
-    resources :users, only: [ :index, :show ] do
-      member do
-        get :balance
-      end
-    end
-    resources :projects, only: [ :index, :show ] do
-      member do
-        post :restore
-      end
-    end
-    resources :shop_orders, only: [ :index, :show ]
-    resources :support_vibes, only: [ :index ]
-  end
+  get "/helper", to: redirect("/admin/support")
+  get "/helper/users", to: redirect("/admin/users")
+  get "/helper/users/:id", to: redirect("/admin/users/%{id}")
+  get "/helper/users/:id/balance", to: redirect("/admin/users/%{id}")
+  get "/helper/projects", to: redirect("/admin/projects")
+  get "/helper/projects/:id", to: redirect("/admin/projects/%{id}")
+  post "/helper/projects/:id/restore", to: redirect("/admin/projects/%{id}")
+  get "/helper/shop_orders", to: redirect("/admin/shop/orders")
+  get "/helper/shop_orders/:id", to: redirect("/admin/shop/orders/%{id}")
+  get "/helper/support_vibes", to: redirect("/admin/support")
 
   # admin shallow routing
   namespace :admin, constraints: AdminConstraint do
@@ -634,6 +621,7 @@ Rails.application.routes.draw do
       end
     end
     get "user-perms", to: "users#user_perms"
+    resource :support, only: [ :show ], controller: "support/dashboards"
     get "manage-shop", to: "shop#index"
     post "shop/clear-carousel-cache", to: "shop#clear_carousel_cache", as: :clear_carousel_cache
     resources :shop_items, only: [ :new, :create, :show, :edit, :update, :destroy ] do
