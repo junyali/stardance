@@ -176,6 +176,17 @@
 #                                            PATCH  /admin/missions/:slug(.:format)                                                                   admin/missions#update
 #                                            PUT    /admin/missions/:slug(.:format)                                                                   admin/missions#update
 #                                            DELETE /admin/missions/:slug(.:format)                                                                   admin/missions#destroy
+#                   next_certification_ships GET    /admin/certification/ship_cert/next(.:format)                                                     certification/ships#next
+#                   claim_certification_ship POST   /admin/certification/ship_cert/:id/claim(.:format)                                                certification/ships#claim
+#                        certification_ships GET    /admin/certification/ship_cert(.:format)                                                          certification/ships#index
+#                         certification_ship GET    /admin/certification/ship_cert/:id(.:format)                                                      certification/ships#show
+#                                            PATCH  /admin/certification/ship_cert/:id(.:format)                                                      certification/ships#update
+#                                            PUT    /admin/certification/ship_cert/:id(.:format)                                                      certification/ships#update
+#                certification_devlog_review PATCH  /admin/certification/devlog_reviews/:id(.:format)                                                 certification/devlog_reviews#update
+#                                            PUT    /admin/certification/devlog_reviews/:id(.:format)                                                 certification/devlog_reviews#update
+#                 certification_ysws_reviews GET    /admin/certification/review(.:format)                                                             certification/ysws#index
+#                  certification_ysws_review GET    /admin/certification/review/:id(.:format)                                                         certification/ysws#show
+#            certification_ysws_report_fraud POST   /admin/certification/review/:id/report_fraud(.:format)                                            certification/ysws#report_fraud
 #                                      queue GET    /queue(.:format)                                                                                  queue#index
 #                             projects_setup GET    /projects/setup(.:format)                                                                         projects/setup#idea
 #                 projects_setup_submit_idea POST   /projects/setup/idea(.:format)                                                                    projects/setup#submit_idea
