@@ -1,6 +1,6 @@
-class Admin::Shop::ItemPolicy < ApplicationPolicy
+class Admin::ShopItemPolicy < ApplicationPolicy
   def index?
-    user.admin? || user.shop_manager?
+    user&.admin? || user&.shop_manager?
   end
 
   def show?
@@ -11,15 +11,19 @@ class Admin::Shop::ItemPolicy < ApplicationPolicy
     index?
   end
 
+  def new?
+    create?
+  end
+
   def update?
     index?
   end
 
   def destroy?
-    user.admin?
+    user&.admin?
   end
 
   def manage?
-    user.admin?
+    user&.admin?
   end
 end

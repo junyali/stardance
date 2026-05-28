@@ -2,12 +2,12 @@ class Admin::Users::FeatureFlagsController < Admin::ApplicationController
   before_action :set_user
 
   def create
-    authorize [:admin, :users, :feature_flag]
+    authorize @user, :manage_feature_flags?
 
     feature = params[:feature].to_sym
     Flipper.enable(feature, @user)
 
-    PaperTrail::Version.create!(
+    ::PaperTrail::Version.create!(
       item_type: "User",
       item_id: @user.id,
       event: "flipper_enable",
@@ -20,12 +20,12 @@ class Admin::Users::FeatureFlagsController < Admin::ApplicationController
   end
 
   def destroy
-    authorize [:admin, :users, :feature_flag]
+    authorize @user, :manage_feature_flags?
 
     feature = params[:feature].to_sym
     Flipper.disable(feature, @user)
 
-    PaperTrail::Version.create!(
+    ::PaperTrail::Version.create!(
       item_type: "User",
       item_id: @user.id,
       event: "flipper_disable",

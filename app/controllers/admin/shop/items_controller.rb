@@ -9,7 +9,7 @@ class Admin::Shop::ItemsController < Admin::ApplicationController
     end
 
     def new
-      authorize [ :admin, :shop, :item ], :new?
+      authorize ShopItem, :new?
       @shop_item = if params[:type].present? && available_shop_item_types.include?(params[:type])
         available_shop_item_types.find { |t| t == params[:type] }.constantize.new
       else
@@ -24,8 +24,8 @@ class Admin::Shop::ItemsController < Admin::ApplicationController
     end
 
     def create
-      authorize [ :admin, :shop, :item ], :create?
       @shop_item = ShopItem.new(shop_manager? ? draft_shop_item_params : shop_item_params)
+      authorize @shop_item, :create?
 
       if shop_manager?
         @shop_item.draft = true
@@ -51,7 +51,7 @@ class Admin::Shop::ItemsController < Admin::ApplicationController
 
       if @shop_item.update(p)
         if @shop_item.saved_change_to_blocked_countries?
-          PaperTrail::Version.create!(
+          ::PaperTrail::Version.create!(
             item_type: "ShopItem",
             item_id: @shop_item.id,
             event: "blocked_countries_changed",
@@ -73,25 +73,25 @@ class Admin::Shop::ItemsController < Admin::ApplicationController
     end
 
     def destroy
-      authorize [ :admin, :shop, :item ], :destroy?
+      authorize @shop_item, :destroy?
       @shop_item.destroy
       redirect_to admin_shop_path, notice: "Shop item deleted successfully."
     end
 
     def preview_markdown
-      authorize [ :admin, :shop, :item ], :show?
+      authorize ShopItem, :show?
       markdown = params[:markdown].to_s
       html = markdown.present? ? MarkdownRenderer.render(markdown) : ""
       render plain: html
     end
 
     def request_approval
-      authorize [ :admin, :shop, :item ], :update?
+      authorize @shop_item, :update?
       unless @shop_item.draft? && @shop_item.created_by_user_id == current_user.id
         redirect_to admin_shop_item_path(@shop_item), alert: "You can only request approval for your own drafts." and return
       end
 
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "ShopItem",
         item_id: @shop_item.id,
         event: "approval_requested",
@@ -116,13 +116,13 @@ class Admin::Shop::ItemsController < Admin::ApplicationController
 
     def authorize_shop_item_access!(must_be_draft: false)
       if shop_manager?
-        authorize [ :admin, :shop, :item ], :update?
+        authorize @shop_item, :update?
         if must_be_draft && (!@shop_item.draft? || @shop_item.created_by_user_id != current_user.id)
           redirect_to admin_shop_path, alert: "You can only edit your own draft items."
           return false  # signal to caller
         end
       else
-        authorize [ :admin, :shop, :item ], must_be_draft ? :update? : :show?
+        authorize @shop_item, must_be_draft ? :update? : :show?
       end
       true
     end

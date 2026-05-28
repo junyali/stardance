@@ -3,6 +3,7 @@ module Admin
     before_action :set_mission, only: [ :show, :edit, :update, :destroy, :restore ]
 
     def index
+      authorize Mission
       scope = Mission.with_deleted.order(created_at: :desc)
       scope = scope.where(enabled: false) if params[:filter] == "disabled"
       scope = scope.where.not(deleted_at: nil) if params[:filter] == "deleted"
@@ -12,10 +13,12 @@ module Admin
 
     def new
       @mission = Mission.new
+      authorize @mission
     end
 
     def create
       @mission = Mission.new(mission_params)
+      authorize @mission
       if @mission.save
         redirect_to admin_mission_path(@mission.slug), notice: "Mission created."
       else
@@ -24,10 +27,11 @@ module Admin
     end
 
     def show
+      authorize @mission
       @submissions = @mission.submissions.order(created_at: :desc).limit(50)
 
-      mission_versions = PaperTrail::Version.where(item_type: "Mission", item_id: @mission.id.to_s)
-      child_versions   = PaperTrail::Version.where(
+      mission_versions = ::PaperTrail::Version.where(item_type: "Mission", item_id: @mission.id.to_s)
+      child_versions   = ::PaperTrail::Version.where(
         item_type: %w[Mission::Step Mission::Prize Mission::Membership Mission::ShopUnlock],
         item_id: child_audit_ids
       )
@@ -35,6 +39,7 @@ module Admin
     end
 
     def edit
+      authorize @mission
       @steps       = @mission.steps.ordered
       @prizes      = @mission.prizes.ordered.includes(:shop_item)
       @memberships = @mission.memberships.includes(:user).order(:role, :id)
@@ -42,6 +47,7 @@ module Admin
     end
 
     def update
+      authorize @mission
       if @mission.update(mission_params)
         redirect_to admin_mission_path(@mission.slug), notice: "Mission updated."
       else
@@ -50,11 +56,13 @@ module Admin
     end
 
     def destroy
+      authorize @mission
       @mission.update!(deleted_at: Time.current, enabled: false)
       redirect_to admin_missions_path, notice: "Mission soft-deleted."
     end
 
     def restore
+      authorize @mission, :restore?
       @mission.update!(deleted_at: nil)
       redirect_to admin_mission_path(@mission.slug), notice: "Mission restored."
     end

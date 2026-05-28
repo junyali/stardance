@@ -2,7 +2,7 @@ class Admin::Users::RolesController < Admin::ApplicationController
   before_action :set_user
 
   def create
-    authorize [:admin, :users, :role]
+    authorize @user, :manage_roles?
 
     role_name = params[:role_name]
 
@@ -18,7 +18,7 @@ class Admin::Users::RolesController < Admin::ApplicationController
 
     @user.grant_role!(role_name)
 
-    PaperTrail::Version.create!(
+    ::PaperTrail::Version.create!(
       item_type: "User",
       item_id: @user.id,
       event: "role_promoted",
@@ -31,7 +31,7 @@ class Admin::Users::RolesController < Admin::ApplicationController
   end
 
   def destroy
-    authorize [:admin, :users, :role]
+    authorize @user, :manage_roles?
 
     role_name = params[:name]
 
@@ -43,7 +43,7 @@ class Admin::Users::RolesController < Admin::ApplicationController
     if @user.has_role?(role_name)
       @user.remove_role!(role_name)
 
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "User",
         item_id: @user.id,
         event: "role_demoted",

@@ -2,7 +2,7 @@ class Admin::Users::BansController < Admin::ApplicationController
   before_action :set_user
 
   def create
-    authorize [:admin, :users, :ban]
+    authorize @user, :ban?
 
     reason = params[:reason].presence
 
@@ -10,7 +10,7 @@ class Admin::Users::BansController < Admin::ApplicationController
       @user.ban!(reason: reason)
     end
 
-    PaperTrail::Version.create!(
+    ::PaperTrail::Version.create!(
       item_type: "User",
       item_id: @user.id,
       event: "banned",
@@ -26,7 +26,7 @@ class Admin::Users::BansController < Admin::ApplicationController
   end
 
   def destroy
-    authorize [:admin, :users, :ban]
+    authorize @user, :ban?
 
     old_reason = @user.banned_reason
 
@@ -34,7 +34,7 @@ class Admin::Users::BansController < Admin::ApplicationController
       @user.unban!
     end
 
-    PaperTrail::Version.create!(
+    ::PaperTrail::Version.create!(
       item_type: "User",
       item_id: @user.id,
       event: "unbanned",

@@ -1,13 +1,12 @@
 class Admin::Users::VoteBalancesController < Admin::ApplicationController
   def update
-    authorize [:admin, :users, :vote_balance]
-
     @user = User.find(params[:user_id])
+    authorize @user, :set_vote_balance?
     old = @user.vote_balance
     val = params[:vote_balance].to_i
     @user.update!(vote_balance: val)
 
-    PaperTrail::Version.create!(
+    ::PaperTrail::Version.create!(
       item_type: "User", item_id: @user.id, event: "vote_balance_set",
       whodunnit: current_user.id.to_s,
       object_changes: { vote_balance: [ old, val ] }.to_json

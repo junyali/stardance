@@ -1,8 +1,7 @@
 class Admin::Users::VerificationsController < Admin::ApplicationController
   def create
-    authorize [:admin, :users, :verification]
-
     @user = User.find(params[:user_id])
+    authorize @user, :refresh_verification?
 
     identity = @user.identities.find_by(provider: "hack_club")
 
@@ -26,7 +25,7 @@ class Admin::Users::VerificationsController < Admin::ApplicationController
     @user.ysws_eligible = ysws_eligible
     @user.save!
 
-    PaperTrail::Version.create!(
+    ::PaperTrail::Version.create!(
       item_type: "User",
       item_id: @user.id,
       event: "verification_refreshed",

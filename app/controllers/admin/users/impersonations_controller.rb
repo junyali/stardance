@@ -3,14 +3,14 @@ class Admin::Users::ImpersonationsController < Admin::ApplicationController
 
   def create
     @user = User.find(params[:user_id])
-    authorize @user, policy_class: Admin::Users::ImpersonationPolicy
+    authorize @user, :impersonate?
 
     admin_user = current_user
     session[:impersonator_user_id] = admin_user.id
     session[:user_id] = @user.id
     pundit_reset!
 
-    PaperTrail::Version.create!(
+    ::PaperTrail::Version.create!(
       item_type: "User",
       item_id: @user.id,
       event: "impersonation_started",
@@ -26,10 +26,10 @@ class Admin::Users::ImpersonationsController < Admin::ApplicationController
   end
 
   def destroy
-    authorize [:admin, :users, :impersonation]
+    authorize current_user, :stop_impersonating?
 
     if real_user && current_user
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "User",
         item_id: current_user.id,
         event: "impersonation_stopped",

@@ -1,8 +1,7 @@
 class Admin::Users::GrantCancellationsController < Admin::ApplicationController
   def create
-    authorize [:admin, :users, :grant_cancellation]
-
     @user = User.find(params[:user_id])
+    authorize @user, :cancel_grants?
     grants = @user.shop_card_grants.where.not(hcb_grant_hashid: nil)
 
     if grants.empty?
@@ -22,7 +21,7 @@ class Admin::Users::GrantCancellationsController < Admin::ApplicationController
       end
     end
 
-    PaperTrail::Version.create!(
+    ::PaperTrail::Version.create!(
       item_type: "User",
       item_id: @user.id,
       event: "all_hcb_grants_canceled",

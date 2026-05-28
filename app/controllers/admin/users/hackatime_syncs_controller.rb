@@ -1,8 +1,7 @@
 class Admin::Users::HackatimeSyncsController < Admin::ApplicationController
   def create
-    authorize [:admin, :users, :hackatime_sync]
-
     @user = User.find(params[:user_id])
+    authorize @user, :sync_hackatime?
 
     if @user.hackatime_identity
       @user.try_sync_hackatime_data!(force: true)

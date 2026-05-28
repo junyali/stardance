@@ -2,7 +2,7 @@ class Admin::Shop::SuggestionsController < Admin::ApplicationController
     before_action :set_suggestion, only: [ :dismiss, :disable_for_user ]
 
     def index
-      authorize [ :admin, :shop, :suggestion ]
+      authorize ShopSuggestion
 
       @pagy, @suggestions = pagy(
         ShopSuggestion.includes(:user).order(created_at: :desc)
@@ -10,7 +10,7 @@ class Admin::Shop::SuggestionsController < Admin::ApplicationController
     end
 
     def dismiss
-      authorize [ :admin, :shop, :suggestion ], :destroy?
+      authorize @suggestion, :destroy?
 
       @suggestion.destroy
 
@@ -18,7 +18,7 @@ class Admin::Shop::SuggestionsController < Admin::ApplicationController
     end
 
     def disable_for_user
-      authorize [ :admin, :shop, :suggestion ], :update?
+      authorize @suggestion, :update?
 
       user = @suggestion.user
 

@@ -1,6 +1,6 @@
 class Admin::Shop::DashboardController < Admin::ApplicationController
   def show
-    authorize [ :admin, :shop, :item ], :index?
+    authorize ShopItem, :index?
     @shop_items = ShopItem.order(created_at: :desc)
 
     if params[:search].present?
@@ -25,7 +25,7 @@ class Admin::Shop::DashboardController < Admin::ApplicationController
   end
 
   def clear_carousel_cache
-    authorize [ :admin, :shop, :item ], :manage?
+    authorize ShopItem, :manage?
     Rails.cache.delete(Cache::CarouselPrizesJob::CACHE_KEY)
     redirect_to admin_shop_path, notice: "Carousel cache cleared successfully."
   end

@@ -1,5 +1,5 @@
 class Admin::Fraud::DashboardsController < Admin::ApplicationController
   def show
-    authorize [ :admin, :fraud, :dashboard ]
+    authorize :fraud_dashboard
   end
 end

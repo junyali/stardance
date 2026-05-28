@@ -1,21 +1,20 @@
 class Admin::Shop::OrdersController < Admin::ApplicationController
   before_action :set_paper_trail_whodunnit
+  before_action :set_order, except: [ :index ]
+
   def index
     # Determine view mode
     @view = params[:view] || "shop_orders"
     @limit = params[:limit] || "10"
 
+    authorize ShopOrder, :index?
+
     # Fulfillment team can only access fulfillment view - auto-redirect if needed
     # But fraud_dept members with fulfillment_person role should have full access
-    if current_user.shop_manager? && !current_user.admin?
-      authorize [ :admin, :shop, :order ], :index?
-    elsif current_user.fulfillment_person? && !current_user.admin? && !current_user.fraud_dept?
+    if current_user.fulfillment_person? && !current_user.admin? && !current_user.fraud_dept?
       if @view != "fulfillment"
         redirect_to admin_shop_orders_path(view: "fulfillment") and return
       end
-      authorize [ :admin, :shop, :order ], :index?
-    else
-      authorize [ :admin, :shop, :order ], :index?
     end
 
     # Load fulfillment users for assignment dropdown (admins and fulfillment peeps, fulfillment view)
@@ -93,13 +92,12 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
 
   def show
     if current_user.shop_manager? && !current_user.admin?
-      authorize [ :admin, :shop, :order ], :show?
+      authorize @order, :show?
     elsif current_user.fulfillment_person? && !current_user.admin? && !current_user.fraud_dept?
-      authorize [ :admin, :shop, :order ], :show?
+      authorize @order, :show?
     else
-      authorize [ :admin, :shop, :order ], :show?
+      authorize @order, :show?
     end
-    @order = ShopOrder.find(params[:id])
 
     # Fulfillment persons can only view orders in their regions, assigned to them, or with nil region
     if current_user.fulfillment_person? && !current_user.admin? && !current_user.fraud_dept?
@@ -155,16 +153,15 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
 
   def reveal_address
     if current_user.fulfillment_person? && !current_user.admin? && !current_user.fraud_dept?
-      authorize [ :admin, :shop, :order ], :reveal_address?
+      authorize @order, :reveal_address?
     else
-      authorize [ :admin, :shop, :order ], :reveal_address?
+      authorize @order, :reveal_address?
     end
-    @order = ShopOrder.find(params[:id])
 
     if @order.can_view_address?(current_user)
       @decrypted_address = @order.decrypted_address_for(current_user)
 
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "User",
         item_id: @order.user_id,
         event: "address_revealed",
@@ -184,17 +181,16 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
 
   def reveal_phone
     if current_user.fulfillment_person? && !current_user.admin? && !current_user.fraud_dept?
-      authorize [ :admin, :shop, :order ], :reveal_phone?
+      authorize @order, :reveal_phone?
     else
-      authorize [ :admin, :shop, :order ], :reveal_phone?
+      authorize @order, :reveal_phone?
     end
-    @order = ShopOrder.find(params[:id])
 
     if @order.can_view_address?(current_user)
       decrypted_address = @order.decrypted_address_for(current_user)
       phone_number = decrypted_address&.dig("phone_number")
 
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "User",
         item_id: @order.user_id,
         event: "phone_revealed",
@@ -212,8 +208,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
   end
 
   def approve
-    authorize [ :admin, :shop, :order ], :approve?
-    @order = ShopOrder.find(params[:id])
+    authorize @order, :approve?
 
     if @order.user_id == current_user.id
       redirect_to admin_shop_order_path(@order), alert: "You cannot approve your own order." and return
@@ -248,7 +243,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
     end
 
     if success
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "ShopOrder",
         item_id: @order.id,
         event: "update",
@@ -264,8 +259,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
   end
 
   def review_order
-    authorize [ :admin, :shop, :order ], :review_order?
-    @order = ShopOrder.find(params[:id])
+    authorize @order, :review_order?
 
     if !current_user.admin? && @order.user_id == current_user.id
       redirect_to admin_shop_order_path(@order), alert: "You cannot review your own order." and return
@@ -287,7 +281,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
       if review.save
         new_review_count = previous_review_count + 1
 
-        PaperTrail::Version.create!(
+        ::PaperTrail::Version.create!(
           item_type: "ShopOrder",
           item_id: @order.id,
           event: "review",
@@ -314,8 +308,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
   end
 
   def reject
-    authorize [ :admin, :shop, :order ], :reject?
-    @order = ShopOrder.find(params[:id])
+    authorize @order, :reject?
 
     if @order.requires_additional_review?
       redirect_to admin_shop_order_path(@order), alert: "This is a high-value order and requires 2 fraud dept reviews before rejection (#{@order.reviews.count}/2 so far)." and return
@@ -339,7 +332,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
     @order.fraud_related_project_id = fraud_project_id.presence
 
     if @order.mark_rejected(reason) && @order.save
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "ShopOrder",
         item_id: @order.id,
         event: "update",
@@ -359,7 +352,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
         a.joe_case_url = joe_case_url.presence
         a.fraud_related_project_id = fraud_project_id.presence
         next unless a.mark_rejected(reason) && a.save
-        PaperTrail::Version.create!(
+        ::PaperTrail::Version.create!(
           item_type: "ShopOrder", item_id: a.id, event: "update", whodunnit: current_user.id,
           object_changes: { aasm_state: [ old, a.aasm_state ], rejection_reason: [ nil, reason ], parent_order_cancelled: [ nil, @order.id ] }
         )
@@ -374,12 +367,11 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
   end
 
   def place_on_hold
-    authorize [ :admin, :shop, :order ], :update?
-    @order = ShopOrder.find(params[:id])
+    authorize @order, :update?
     old_state = @order.aasm_state
 
     if @order.place_on_hold && @order.save
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "ShopOrder",
         item_id: @order.id,
         event: "update",
@@ -395,12 +387,11 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
   end
 
   def release_from_hold
-    authorize [ :admin, :shop, :order ], :update?
-    @order = ShopOrder.find(params[:id])
+    authorize @order, :update?
     old_state = @order.aasm_state
 
     if @order.take_off_hold && @order.save
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "ShopOrder",
         item_id: @order.id,
         event: "update",
@@ -417,11 +408,10 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
 
   def mark_fulfilled
     if current_user.fulfillment_person? && !current_user.admin? && !current_user.fraud_dept?
-      authorize [ :admin, :shop, :order ], :update?
+      authorize @order, :update?
     else
-      authorize [ :admin, :shop, :order ], :update?
+      authorize @order, :update?
     end
-    @order = ShopOrder.find(params[:id])
 
     if @order.shop_item.requires_verification_call? && !current_user.admin? && !@order.awaiting_periodical_fulfillment?
       redirect_to admin_shop_order_path(@order), alert: "Only admins can fulfill verification-call items" and return
@@ -430,7 +420,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
     old_state = @order.aasm_state
 
     if @order.mark_fulfilled(params[:external_ref].presence, params[:fulfillment_cost].presence, current_user.display_name) && @order.save
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "ShopOrder",
         item_id: @order.id,
         event: "update",
@@ -447,15 +437,14 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
 
   def update_internal_notes
     if current_user.fulfillment_person? && !current_user.admin? && !current_user.fraud_dept?
-      authorize [ :admin, :shop, :order ], :update?
+      authorize @order, :update?
     else
-      authorize [ :admin, :shop, :order ], :update?
+      authorize @order, :update?
     end
-    @order = ShopOrder.find(params[:id])
     old_notes = @order.internal_notes
 
     if @order.update(internal_notes: params[:internal_notes])
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "ShopOrder",
         item_id: @order.id,
         event: "update",
@@ -471,15 +460,14 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
   end
 
   def assign_user
-    authorize [ :admin, :shop, :order ], :assign_user?
-    @order = ShopOrder.find(params[:id])
+    authorize @order, :assign_user?
     old_assigned = @order.assigned_to_user_id
 
     new_assigned_id = params[:assigned_to_user_id].presence
     assigned_user = new_assigned_id ? User.find_by(id: new_assigned_id) : nil
 
     if @order.update(assigned_to_user_id: new_assigned_id)
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "ShopOrder",
         item_id: @order.id,
         event: "assignment_updated",
@@ -496,8 +484,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
   end
 
   def approve_verification_call
-    authorize [ :admin, :shop, :order ], :manage?
-    @order = ShopOrder.find(params[:id])
+    authorize @order, :manage?
     old_state = @order.aasm_state
 
     unless @order.awaiting_verification_call?
@@ -505,7 +492,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
     end
 
     if @order.queue_for_fulfillment && @order.save
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "ShopOrder",
         item_id: @order.id,
         event: "update",
@@ -521,8 +508,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
   end
 
   def cancel_hcb_grant
-    authorize [ :admin, :shop, :order ], :approve?
-    @order = ShopOrder.find(params[:id])
+    authorize @order, :approve?
 
     unless @order.shop_card_grant.present?
       redirect_to admin_shop_order_path(@order), alert: "This order has no HCB grant to cancel"
@@ -533,7 +519,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
     begin
       HCBService.cancel_card_grant!(hashid: grant.hcb_grant_hashid)
 
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "ShopOrder",
         item_id: @order.id,
         event: "hcb_grant_canceled",
@@ -547,6 +533,10 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
     end
   end
   private
+
+  def set_order
+    @order = ShopOrder.find(params[:id])
+  end
 
   def apply_shared_filters(scope)
     scope = scope.where(shop_item_id: params[:shop_item_id]) if params[:shop_item_id].present?
@@ -594,8 +584,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
   public
 
   def send_to_theseus
-    authorize [ :admin, :shop, :order ], :update?
-    @order = ShopOrder.find(params[:id])
+    authorize @order, :update?
 
     order_ids = (Array(params[:order_ids]).map(&:to_i) | [ @order.id ]).uniq
 
@@ -621,8 +610,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
   end
 
   def refresh_verification
-    authorize [ :admin, :shop, :order ], :update?
-    @order = ShopOrder.find(params[:id])
+    authorize @order, :update?
 
     unless @order.awaiting_verification?
       redirect_to admin_shop_order_path(@order), alert: "Order is not awaiting verification" and return
@@ -648,7 +636,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
     user.ysws_eligible = ysws_eligible
     user.save!
 
-    PaperTrail::Version.create!(
+    ::PaperTrail::Version.create!(
       item_type: "ShopOrder",
       item_id: @order.id,
       event: "verification_refreshed",
@@ -674,8 +662,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
   end
 
   def force_state
-    authorize [ :admin, :shop, :order ], :manage?
-    @order = ShopOrder.find(params[:id])
+    authorize @order, :manage?
 
     old_state = @order.aasm_state
     new_state = params[:target_state]
@@ -692,7 +679,7 @@ class Admin::Shop::OrdersController < Admin::ApplicationController
 
     @order.update_column(:aasm_state, new_state)
 
-    PaperTrail::Version.create!(
+    ::PaperTrail::Version.create!(
       item: @order,
       event: "update",
       whodunnit: current_user.id.to_s,

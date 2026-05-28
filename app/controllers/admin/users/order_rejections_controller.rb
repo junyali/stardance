@@ -1,8 +1,7 @@
 class Admin::Users::OrderRejectionsController < Admin::ApplicationController
   def create
-    authorize [:admin, :users, :order_rejection]
-
     @user = User.find(params[:user_id])
+    authorize @user, :reject_orders?
     reason = params[:reason].presence || "Rejected by fraud department"
 
     orders = @user.shop_orders.where(aasm_state: %w[pending awaiting_periodical_fulfillment])
@@ -11,7 +10,7 @@ class Admin::Users::OrderRejectionsController < Admin::ApplicationController
     orders.each do |order|
       old_state = order.aasm_state
       if order.mark_rejected(reason) && order.save
-        PaperTrail::Version.create!(
+        ::PaperTrail::Version.create!(
           item_type: "ShopOrder",
           item_id: order.id,
           event: "update",

@@ -1,6 +1,6 @@
 class Admin::UsersController < Admin::ApplicationController
   def index
-    authorize [ :admin, :user ]
+    authorize User
     @query = params[:query]
 
     users = User.all
@@ -13,15 +13,15 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   def show
-    authorize [ :admin, :user ]
     @user = User.includes(:identities).find(params[:id])
+    authorize @user
 
     @all_projects = @user.projects.with_deleted.order(deleted_at: :desc)
   end
 
   def update
-    authorize [ :admin, :user ]
     @user = User.find(params[:id])
+    authorize @user
 
     old_regions = @user.regions.dup
 
@@ -31,7 +31,7 @@ class Admin::UsersController < Admin::ApplicationController
 
     if @user.update(user_params)
       if old_regions != @user.regions
-        PaperTrail::Version.create!(
+        ::PaperTrail::Version.create!(
           item_type: "User",
           item_id: @user.id,
           event: "regions_updated",
@@ -48,7 +48,7 @@ class Admin::UsersController < Admin::ApplicationController
   end
 
   def user_perms
-    authorize [ :admin, :user ], :index?
+    authorize User, :index?
     @users = User.where("array_length(granted_roles, 1) > 0").order(:id)
   end
 

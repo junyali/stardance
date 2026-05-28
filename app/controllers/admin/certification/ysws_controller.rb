@@ -1,6 +1,6 @@
 class Admin::Certification::YswsController < Admin::Certification::ApplicationController
   def index
-    authorize [ :certification, :ysws ]
+    authorize ::Certification::Ysws
 
     @reviews = ::Certification::Ysws
       .where(reviewed_at: nil)
@@ -9,11 +9,10 @@ class Admin::Certification::YswsController < Admin::Certification::ApplicationCo
   end
 
   def show
-    authorize [ :certification, :ysws ], :show?
-
     @review = ::Certification::Ysws
       .includes(:project, :user, :reviewer, devlog_reviews: { post_devlog: :attachments_attachments })
       .find(params[:id])
+    authorize @review
 
     devlog_minutes = @review.devlog_reviews.map(&:original_minutes).compact
 
@@ -33,11 +32,10 @@ class Admin::Certification::YswsController < Admin::Certification::ApplicationCo
   end
 
   def report_fraud
-    authorize [ :certification, :ysws ], :report_fraud?
-
     @review = ::Certification::Ysws.find(params[:id])
+    authorize @review, :report_fraud?
 
-    report = Project::Report.new(
+    report = ::Project::Report.new(
       project_id: @review.project_id,
       reporter_id: current_user.id,
       reason: "YSWS project flag",

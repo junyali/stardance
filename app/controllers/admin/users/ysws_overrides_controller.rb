@@ -1,8 +1,7 @@
 class Admin::Users::YswsOverridesController < Admin::ApplicationController
   def update
-    authorize [:admin, :users, :ysws_override]
-
     @user = User.find(params[:user_id])
+    authorize @user, :manage_ysws_override?
 
     raw_override = params[:manual_ysws_override]
     new_override = raw_override == "true" ? true : nil
@@ -10,7 +9,7 @@ class Admin::Users::YswsOverridesController < Admin::ApplicationController
     @user.manual_ysws_override = new_override
 
     if @user.save
-      PaperTrail::Version.create!(
+      ::PaperTrail::Version.create!(
         item_type: "User",
         item_id: @user.id,
         event: "manual_ysws_override_set",
