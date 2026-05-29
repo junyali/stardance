@@ -66,7 +66,7 @@ export default class extends Controller {
     }
     this.popover.appendChild(document.createTextNode(this.messageValue));
 
-    document.body.appendChild(this.popover);
+    this.#container().appendChild(this.popover);
 
     this.reposition();
 
@@ -126,6 +126,13 @@ export default class extends Controller {
         break;
     }
 
+    const container = this.#container();
+    if (container !== document.body) {
+      const cr = container.getBoundingClientRect();
+      top -= cr.top;
+      left -= cr.left;
+    }
+
     this.popover.style.top = `${Math.max(8, top)}px`;
     this.popover.style.left = `${Math.max(8, left)}px`;
   }
@@ -138,5 +145,10 @@ export default class extends Controller {
 
   handleKey(event) {
     if (event.key === "Escape") this.hide();
+  }
+
+  #container() {
+    const dialog = this.element.closest("dialog[open]");
+    return dialog || document.body;
   }
 }

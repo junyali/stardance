@@ -12,9 +12,14 @@ module IdvHelper
   #   line    – the owner-facing "why your stuff is private" sentence
   #   cta     – label for the link that opens the verify popup
   def idv_status_for(user)
-    return nil if user.nil? || user.identity_verified?
+    return nil if user.nil?
+    return nil if user.identity_verified? && user.ysws_eligible?
 
-    if user.verification_pending?
+    if user.identity_verified? && !user.ysws_eligible?
+      { variant: :warning,
+        line: "Your identity is verified, but you're not eligible for YSWS prizes yet.",
+        cta: "Learn more" }
+    elsif user.verification_pending?
       { variant: :warning,
         line: "We're reviewing your identity — your profile stays private until it's approved.",
         cta: "Check status" }

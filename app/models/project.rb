@@ -362,6 +362,13 @@ class Project < ApplicationRecord
         passed: memberships.owner.first&.user&.identity_verified?
       },
       {
+        key: :ysws_eligible,
+        label: "You're eligible for YSWS prizes",
+        fail_label: "You're not eligible for YSWS prizes yet — check the Hack Club portal",
+        tooltip: "Your identity is verified, but YSWS eligibility is still pending. Open the Hack Club portal for details.",
+        passed: memberships.owner.first&.user&.ysws_eligible?
+      },
+      {
         key: :shop_tutorial,
         label: "Pick stickers or nothing in the shop once",
         fail_label: "Visit the shop and pick stickers (or nothing) to get started",

@@ -3,7 +3,9 @@
   <h2 class="idv-setup-card__title"><%= title %></h2>
 
   <div class="idv-setup-card__body">
-    <% if pending? %>
+    <% if ysws_ineligible? %>
+      <p class="idv-setup-card__lede">Your identity is verified and your work is public, but you're not yet eligible for YSWS prizes. Open the Hack Club portal for details or contact support.</p>
+    <% elsif pending? %>
       <p class="idv-setup-card__lede">Your verification is in the queue. As soon as it's approved, your profile and devlogs become visible to other builders. We'll email you when it's done.</p>
     <% elsif ineligible? %>
       <p class="idv-setup-card__lede">Your last verification attempt didn't go through. Open the Hack Club portal to see what happened or contact support if you're stuck.</p>
@@ -13,7 +15,16 @@
     <% end %>
   </div>
 
-  <% if pending? %>
+  <% if ysws_ineligible? %>
+    <%= render ActionButtonComponent.new(
+          text: "Open Hack Club portal",
+          href: verify_url,
+          variant: :primary,
+          size: :large,
+          class: "idv-setup-card__cta",
+          data: { turbo: false }
+        ) %>
+  <% elsif pending? %>
     <%= button_to "Check verification status",
                   my_verification_refresh_path,
                   method: :post,

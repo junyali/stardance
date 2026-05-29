@@ -29,6 +29,7 @@ export default class extends Controller {
     }
 
     this.openSettingsModalFromQueryParam();
+    this.openIdvModalFromQueryParam();
   }
 
   disconnect() {
@@ -105,6 +106,24 @@ export default class extends Controller {
     }
 
     params.delete("settings");
+    const query = params.toString();
+    const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}${
+      window.location.hash
+    }`;
+    window.history.replaceState(window.history.state, "", nextUrl);
+  }
+
+  openIdvModalFromQueryParam() {
+    if (this.element.id !== "idv-verify-modal") return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("idv_check")) return;
+
+    if (!this.element.open) {
+      this.element.showModal();
+    }
+
+    params.delete("idv_check");
     const query = params.toString();
     const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}${
       window.location.hash

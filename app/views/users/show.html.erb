@@ -120,6 +120,14 @@
         </div>
       <% end %>
 
+      <% if own_profile && @user.identity_verified? && !cookies[:idv_approved_dismissed] %>
+        <p class="profile__idv-alert profile__idv-alert--success"
+           data-controller="dismissable"
+           data-dismissable-cookie-value="idv_approved_dismissed">
+          You're verified — your work is now public!
+          <button type="button" class="profile__idv-alert-dismiss" data-action="click->dismissable#dismiss" aria-label="Dismiss">&times;</button>
+        </p>
+      <% end %>
       <% if own_profile && (idv = idv_status_for(@user)) %>
         <p class="profile__idv-alert profile__idv-alert--<%= idv[:variant] %>">
           <%= idv[:line] %>

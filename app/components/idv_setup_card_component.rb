@@ -14,10 +14,12 @@ class IdvSetupCardComponent < ViewComponent::Base
   end
 
   def render?
-    user.present? && !user.identity_verified?
+    user.present? && (!user.identity_verified? || ysws_ineligible?)
   end
 
   def status_eyebrow
+    return "not eligible for prizes" if ysws_ineligible?
+
     case user.verification_status
     when "pending"     then "we're reviewing"
     when "ineligible"  then "something went wrong"
@@ -26,6 +28,8 @@ class IdvSetupCardComponent < ViewComponent::Base
   end
 
   def title
+    return "You're verified, but not eligible for YSWS yet." if ysws_ineligible?
+
     case user.verification_status
     when "pending"     then "Hold tight — we're verifying your identity."
     when "ineligible"  then "We couldn't verify your identity."
@@ -33,8 +37,9 @@ class IdvSetupCardComponent < ViewComponent::Base
     end
   end
 
-  def pending?     = user.verification_pending?
-  def ineligible?  = user.verification_ineligible?
+  def pending?          = user.verification_pending?
+  def ineligible?       = user.verification_ineligible?
+  def ysws_ineligible?  = user.identity_verified? && !user.ysws_eligible?
 
   def verify_url
     HCAService.verify_portal_url(return_to: return_to.presence || helpers.request.original_url)
