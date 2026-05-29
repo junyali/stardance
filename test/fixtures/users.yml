@@ -29,8 +29,11 @@
 #  regions                      :string           default([]), is an Array
 #  session_token                :string
 #  shop_region                  :enum
+#  shop_tutorial_completed_at   :datetime
+#  shop_tutorial_started_at     :datetime
 #  synced_at                    :datetime
 #  things_dismissed             :string           default([]), not null, is an Array
+#  verification_checked_at      :datetime
 #  verification_status          :string           default("needs_submission"), not null
 #  vote_balance                 :integer          default(0), not null
 #  votes_count                  :integer
@@ -50,13 +53,13 @@
 #
 one:
   email: one@example.test
-  display_name: user_one
+  display_name: fixture_one
   slack_id: U_FIXTURE_ONE
   votes_count: 1
 
 two:
   email: two@example.test
-  display_name: user_two
+  display_name: fixture_two
   slack_id: U_FIXTURE_TWO
   votes_count: 1
 

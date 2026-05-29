@@ -27,6 +27,8 @@
 #  regions                      :string           default([]), is an Array
 #  session_token                :string
 #  shop_region                  :enum
+#  shop_tutorial_completed_at   :datetime
+#  shop_tutorial_started_at     :datetime
 #  synced_at                    :datetime
 #  things_dismissed             :string           default([]), not null, is an Array
 #  verification_checked_at      :datetime
@@ -158,6 +160,7 @@ class User < ApplicationRecord
   include User::Verification
   include User::HackatimeSync
   include User::ShopAccess
+  include User::ShopTutorial
   include User::Wallet
   include User::Moderation
   include User::Achievements
