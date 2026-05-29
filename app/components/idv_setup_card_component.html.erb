@@ -13,14 +13,34 @@
     <% end %>
   </div>
 
-  <%= render ActionButtonComponent.new(
-        text: pending? ? "Check on Hack Club" : (ineligible? ? "Re-open Hack Club verification" : "Verify your identity"),
-        href: verify_url,
-        variant: :primary,
-        size: :large,
-        class: "idv-setup-card__cta",
-        data: { turbo: false }
-      ) %>
+  <% if pending? %>
+    <%= button_to "Check verification status",
+                  my_verification_refresh_path,
+                  method: :post,
+                  class: "action-btn action-btn--large action-btn--primary idv-setup-card__cta",
+                  form: { class: "idv-setup-card__cta-form" } %>
+  <% else %>
+    <%= render ActionButtonComponent.new(
+          text: ineligible? ? "Re-open Hack Club verification" : "Verify your identity",
+          href: verify_url,
+          variant: :primary,
+          size: :large,
+          class: "idv-setup-card__cta",
+          data: { turbo: false }
+        ) %>
+  <% end %>
+
+  <% if user.verification_checked_at.present? %>
+    <p class="idv-setup-card__checked">Last checked <%= helpers.time_ago_in_words(user.verification_checked_at) %> ago</p>
+  <% end %>
+
+  <% if Rails.env.development? %>
+    <%= button_to "Pretend IDV is verified (dev)",
+                  my_pretend_idv_dev_path,
+                  method: :post,
+                  class: "action-btn action-btn--small action-btn--secondary idv-setup-card__dev-cta",
+                  form: { class: "idv-setup-card__dev-form" } %>
+  <% end %>
 
   <footer class="idv-setup-card__footer">
     <p class="idv-setup-card__footer-line">501(c)(3) nonprofit · We don't sell data or run ads</p>

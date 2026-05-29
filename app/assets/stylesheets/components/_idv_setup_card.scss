@@ -54,6 +54,29 @@
     margin-top: 0.5rem;
   }
 
+  // Wraps the button_to "Check verification status" — keep it inline so it
+  // sits where the card's alignment puts it (centered inside the popup).
+  &__cta-form {
+    display: flex;
+    margin: 0;
+  }
+
+  &__checked {
+    color: var(--color-space-text-muted);
+    font-size: var(--font-size-s);
+    margin: 0.25rem 0 0;
+  }
+
+  &__dev-cta {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+    opacity: 0.85;
+  }
+
+  &__dev-form {
+    margin: 0;
+  }
+
   &__footer {
     border-top: 1px solid rgba(255, 255, 255, 0.18);
     display: flex;
@@ -219,7 +242,8 @@
       color: var(--color-space-text);
     }
 
-    &__cta {
+    &__cta,
+    &__dev-cta {
       align-self: center;
     }
 
