@@ -84,16 +84,16 @@ class UsersController < ApplicationController
   end
 
   def profile_activity
-    scope = Post.joins(:project)
-                .merge(Project.not_deleted)
+    scope = Post.left_outer_joins(:project)
+                .where("projects.deleted_at IS NULL OR posts.postable_type = ?", "Post::Repost")
                 .visible_to(current_user)
                 .where(user_id: @user.id)
-                .preload(:project, :user, postable: [ { attachments_attachments: :blob } ])
+                .preload(:project, :user, :postable)
                 .order(created_at: :desc)
 
     scope = hide_deleted_devlogs(scope) unless policy(@user).view_deleted_devlogs?
     scope = hide_rejected_ships(scope)
-    scope
+    scope.select { |post| !post.repost? || post.visible_repost_original_for?(current_user) }
   end
 
   def hide_deleted_devlogs(scope)

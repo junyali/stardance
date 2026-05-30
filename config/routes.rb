@@ -727,6 +727,10 @@ Rails.application.routes.draw do
   end
 
   # Devlog likes and comments
+  resources :posts, only: [] do
+    resource :repost, only: [ :create, :destroy ], module: :posts
+  end
+
   resources :devlogs, only: [] do
     resource :like, only: [ :create, :destroy ]
     resources :comments, only: [ :create, :destroy ]

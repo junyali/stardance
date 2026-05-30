@@ -51,7 +51,14 @@ class HomeController < ApplicationController
                       .order(created_at: :desc)
                       .limit(20)
 
-    all_posts = (devlogs.to_a + ship_events.to_a)
+    reposts = Post.of_reposts(join: true)
+                  .visible_to(current_user)
+                  .includes(:user, postable: { original_post: [ :user, :project, :postable ] })
+                  .order(created_at: :desc)
+                  .limit(20)
+                  .select { |post| post.visible_repost_original_for?(current_user) }
+
+    all_posts = (devlogs.to_a + ship_events.to_a + reposts)
                   .sort_by { |p| -p.created_at.to_i }
                   .first(20)
 

@@ -460,6 +460,38 @@
   flex-direction: column;
   gap: 14px;
 
+  &__reposted-by {
+    margin-left: calc(var(--feed-avatar-size) * 0.5);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xxs);
+    color: var(--color-space-text-muted);
+    font-size: calc(var(--font-size-s) * 1.05);
+    line-height: 1.2;
+
+    @media (max-width: 640px) {
+      margin-left: 0;
+    }
+  }
+
+  &__reposted-by-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--color-brand-highlight);
+    fill: currentColor;
+  }
+
+  &__reposted-by-link {
+    color: var(--color-space-text);
+    font-weight: 700;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+
   &__header {
     display: flex;
     align-items: flex-start;
@@ -534,6 +566,11 @@
     @media (max-width: 640px) {
       padding-left: 0;
     }
+  }
+
+  &__body--inline {
+    margin-top: var(--space-xs);
+    padding-left: 0;
   }
 
   &__media {
@@ -678,6 +715,171 @@
 
   &__action--disabled {
     cursor: default;
+  }
+
+  &__action--active {
+    color: var(--color-brand-mint);
+  }
+
+  &__repost {
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  &__repost-menu {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+
+    summary {
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  &__repost-panel {
+    position: absolute;
+    z-index: 5;
+    top: calc(100% + var(--space-xs));
+    left: 50%;
+    width: min(360px, 84vw);
+    padding: var(--space-s);
+    border: 2px solid var(--color-set-3-bg);
+    border-radius: var(--border-radius);
+    background: var(--color-set-1-bg);
+    box-shadow: 0 18px 42px var(--color-shadow-deep);
+    transform: translateX(-50%);
+  }
+
+  &__repost-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-s);
+  }
+
+  &__repost-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  &__repost-form--plain {
+    display: block;
+  }
+
+  &__repost-option {
+    width: 100%;
+    min-height: 52px;
+    padding: var(--space-s);
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    border: 1px solid var(--color-set-3-bg);
+    border-radius: calc(var(--border-radius) * 0.65);
+    color: var(--color-space-text);
+    background: var(--color-overlay-light-soft);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--color-brand-mint);
+      background: var(--color-brand-mint-soft);
+      outline: none;
+    }
+  }
+
+  &__repost-option-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--color-brand-mint);
+    fill: currentColor;
+    flex: 0 0 auto;
+  }
+
+  &__repost-option-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__repost-option-title {
+    font-size: var(--font-size-m);
+    line-height: 1.1;
+  }
+
+  &__repost-option-text {
+    color: var(--color-space-text-muted);
+    font-size: var(--font-size-s);
+    line-height: 1.25;
+  }
+
+  &__repost-label {
+    margin: 0;
+    color: var(--color-space-text-muted);
+    font-size: var(--font-size-s);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  &__repost-textarea {
+    width: 100%;
+    min-height: 96px;
+    padding: var(--space-s);
+    border: 1px solid var(--color-border-input);
+    border-radius: calc(var(--border-radius) * 0.65);
+    color: var(--color-space-text);
+    background: var(--color-overlay-light-soft);
+    font: inherit;
+    resize: vertical;
+
+    &::placeholder {
+      color: var(--color-space-text-muted);
+    }
+
+    &:focus {
+      border-color: var(--color-border-input-focus);
+      outline: none;
+    }
+  }
+
+  &__repost-submit {
+    align-self: flex-end;
+    min-height: 34px;
+    padding: 0 var(--space-m);
+    border: 0;
+    border-radius: 999px;
+    color: var(--color-set-1-bg);
+    background: var(--color-brand-highlight);
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  &__repost-preview {
+    margin-left: var(--feed-content-offset);
+    padding: var(--space-s);
+    border: 2px solid var(--color-set-3-bg);
+    border-radius: var(--border-radius);
+    background: transparent;
+
+    @media (max-width: 640px) {
+      margin-left: 0;
+    }
+  }
+
+  &--repost-preview {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   .like-button,

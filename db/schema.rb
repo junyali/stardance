@@ -352,7 +352,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_30_182421) do
     t.bigint "mission_id", null: false
     t.integer "position", default: 0, null: false
     t.datetime "updated_at", null: false
-    t.index ["mission_id", "language"], name: "index_mission_guide_variants_unique_language", unique: true
+    t.index "mission_id, lower((language)::text)", name: "index_mission_guide_variants_unique_language", unique: true
     t.index ["mission_id"], name: "index_mission_guide_variants_on_mission_id"
   end
 
@@ -410,7 +410,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_30_182421) do
     t.string "language", null: false
     t.bigint "mission_step_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["mission_step_id", "language"], name: "index_mission_step_bodies_unique_language", unique: true
+    t.index "mission_step_id, lower((language)::text)", name: "index_mission_step_bodies_unique_language", unique: true
     t.index ["mission_step_id"], name: "index_mission_step_bodies_on_mission_step_id"
   end
 
@@ -514,6 +514,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_30_182421) do
     t.index ["sha"], name: "index_post_git_commits_on_sha", unique: true
   end
 
+  create_table "post_reposts", force: :cascade do |t|
+    t.string "body"
+    t.datetime "created_at", null: false
+    t.bigint "original_post_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["original_post_id", "user_id"], name: "index_post_reposts_on_original_post_id_and_user_id", unique: true
+    t.index ["original_post_id"], name: "index_post_reposts_on_original_post_id"
+    t.index ["user_id"], name: "index_post_reposts_on_user_id"
+  end
+
   create_table "post_ship_events", force: :cascade do |t|
     t.float "base_hours"
     t.string "body"
@@ -552,7 +563,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_30_182421) do
     t.datetime "created_at", null: false
     t.bigint "postable_id"
     t.string "postable_type"
-    t.bigint "project_id", null: false
+    t.bigint "project_id"
+    t.integer "reposts_count", default: 0, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.index ["postable_type", "postable_id"], name: "index_posts_on_postable_type_and_postable_id", unique: true
@@ -1101,6 +1113,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_30_182421) do
     t.index "lower((display_name)::text)", name: "index_users_on_lower_display_name_unique", unique: true, where: "((display_name IS NOT NULL) AND ((display_name)::text <> ''::text))"
     t.index "lower((email)::text)", name: "index_users_on_lower_email_unique", unique: true, where: "((email IS NOT NULL) AND ((email)::text <> ''::text))"
     t.index ["email"], name: "index_users_on_email"
+    t.index ["guest_email"], name: "index_users_on_guest_email"
     t.index ["onboarded_at"], name: "index_users_on_onboarded_at"
     t.index ["session_token"], name: "index_users_on_session_token", unique: true
     t.index ["slack_id"], name: "index_users_on_slack_id", unique: true
@@ -1202,6 +1215,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_30_182421) do
   add_foreign_key "mission_submissions", "post_ship_events", column: "ship_event_id"
   add_foreign_key "mission_submissions", "shop_orders"
   add_foreign_key "mission_submissions", "users", column: "reviewed_by_id"
+  add_foreign_key "post_reposts", "posts", column: "original_post_id"
+  add_foreign_key "post_reposts", "users"
   add_foreign_key "posts", "projects"
   add_foreign_key "posts", "users"
   add_foreign_key "project_follows", "projects"

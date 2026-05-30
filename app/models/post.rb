@@ -4,10 +4,11 @@
 #
 #  id            :bigint           not null, primary key
 #  postable_type :string
+#  reposts_count :integer          default(0), not null
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
 #  postable_id   :bigint
-#  project_id    :bigint           not null
+#  project_id    :bigint
 #  user_id       :bigint
 #
 # Indexes
@@ -27,7 +28,7 @@ class Post < ApplicationRecord
     # Eager load all Post::* classes so Postable.types is populated
     Dir[Rails.root.join("app/models/post/*.rb")].each { |f| require_dependency f }
 
-    belongs_to :project, touch: true
+    belongs_to :project, optional: true, touch: true
     # optional because it can be a system post – achievements, milestones, well-done/magic happening, etc –
     # integeration – git remotes – or a user post
     belongs_to :user, optional: true
@@ -35,6 +36,7 @@ class Post < ApplicationRecord
     delegated_type :postable, types: Postable.types
 
     validates :postable_id, presence: true, if: :postable_type?
+    validates :project, presence: true, unless: :repost?
 
     after_commit :invalidate_project_time_cache, on: [ :create, :destroy ]
     after_commit :increment_devlogs_count, on: :create
@@ -84,6 +86,23 @@ class Post < ApplicationRecord
         )
       else
         scope.where("posts.user_id IS NULL OR users.verification_status = 'verified'")
+      end
+    end
+
+    def repost?
+      postable_type == "Post::Repost"
+    end
+
+    def visible_repost_original_for?(viewer)
+      if repost?
+        original_post = postable&.original_post
+
+        original_post&.postable_type == "Post::Devlog" &&
+          original_post.postable.present? &&
+          !original_post.postable.deleted? &&
+          Post.visible_to(viewer).where(id: original_post.id).exists?
+      else
+        false
       end
     end
 

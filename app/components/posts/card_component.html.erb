@@ -1,4 +1,14 @@
 <article id="<%= dom_id(post) %>" class="<%= card_classes %>">
+  <% if plain_repost? %>
+    <div class="feed-post-card__reposted-by">
+      <%= inline_svg_tag "icons/repost.svg", class: "feed-post-card__reposted-by-icon" %>
+      <span>Reposted by</span>
+      <%= link_to "@#{post.user.display_name.presence || "stardancer"}",
+            profile_path(post.user.display_name),
+            class: "feed-post-card__reposted-by-link" %>
+    </div>
+  <% end %>
+
   <header class="feed-post-card__header">
     <% if author.present? %>
       <%= link_to profile_path(author.display_name), class: "feed-post-card__avatar-link", aria: { label: "@#{author_name}" } do %>
@@ -21,8 +31,8 @@
           <%= link_to project.title, project_path(project), class: "feed-post-card__project" %>
         <% end %>
 
-        <time class="feed-post-card__time" datetime="<%= post.created_at.iso8601 %>" title="<%= l(post.created_at, format: :long) %>">
-          · <%= time_ago_in_words(post.created_at) %>
+        <time class="feed-post-card__time" datetime="<%= display_post.created_at.iso8601 %>" title="<%= l(display_post.created_at, format: :long) %>">
+          · <%= time_ago_in_words(display_post.created_at) %>
         </time>
 
         <% if show_idv_badge? %>
@@ -30,13 +40,19 @@
         <% end %>
       </p>
 
-      <% if devlog? && postable.respond_to?(:duration_seconds) && postable.duration_seconds.present? %>
-        <p class="feed-post-card__duration"><%= helpers.format_seconds(postable.duration_seconds) %> logged</p>
+      <% if devlog? && display_postable.respond_to?(:duration_seconds) && display_postable.duration_seconds.present? %>
+        <p class="feed-post-card__duration"><%= helpers.format_seconds(display_postable.duration_seconds) %> logged</p>
+      <% end %>
+
+      <% if quote_repost? && body.present? %>
+        <div class="feed-post-card__body feed-post-card__body--inline">
+          <%= helpers.md(body, allow_images: false) %>
+        </div>
       <% end %>
     </div>
   </header>
 
-  <% if body.present? %>
+  <% if body.present? && !quote_repost? %>
     <div class="feed-post-card__body">
       <%= helpers.md(body, allow_images: false) %>
     </div>
@@ -64,20 +80,93 @@
     </div>
   <% end %>
 
+  <% if quote_repost? && original_post.present? %>
+    <div class="feed-post-card__repost-preview">
+      <%= render Posts::CardComponent.new(
+            post: original_post,
+            current_user: current_user,
+            theme: :"repost-preview",
+            compact: true,
+            show_likes: false,
+            show_comments: false,
+            show_reposts: false,
+            show_actions: false
+          ) %>
+    </div>
+  <% end %>
+
+  <% if show_footer? %>
   <footer class="feed-post-card__actions">
-    <% if show_comments && devlog? %>
-      <%= link_to project.present? ? project_path(project, anchor: dom_id(post)) : "#",
+    <% if show_comments && interaction_post&.postable_type == "Post::Devlog" %>
+      <%= link_to interaction_post.project.present? ? project_path(interaction_post.project, anchor: dom_id(interaction_post)) : "#",
             class: "feed-post-card__action",
-            aria: { label: "#{postable.comments_count} comments" } do %>
+            aria: { label: "#{interaction_postable.comments_count} comments" } do %>
         <%= inline_svg_tag "icons/comment.svg", class: "feed-post-card__action-icon" %>
-        <span id="<%= comments_count_id %>"><%= postable.comments_count %></span>
+        <span id="<%= comments_count_id %>"><%= interaction_postable.comments_count %></span>
       <% end %>
     <% end %>
 
-    <span class="feed-post-card__action feed-post-card__action--disabled" aria-label="Reposts are not available yet">
-      <%= inline_svg_tag "icons/repost.svg", class: "feed-post-card__action-icon" %>
-      <span>0</span>
-    </span>
+    <% if show_reposts %>
+      <% if repostable? %>
+        <div class="feed-post-card__repost">
+          <% if reposted_by_current_user? %>
+            <%= button_to post_repost_path(repost_target),
+                  method: :delete,
+                  class: "feed-post-card__action feed-post-card__action--active",
+                  aria: { label: "Remove repost" },
+                  form: { class: "feed-post-card__repost-form" } do %>
+              <%= inline_svg_tag "icons/repost.svg", class: "feed-post-card__action-icon" %>
+              <span><%= repost_count %></span>
+            <% end %>
+          <% elsif current_user.present? %>
+            <details class="feed-post-card__repost-menu">
+              <summary class="feed-post-card__action" aria-label="Repost">
+                <%= inline_svg_tag "icons/repost.svg", class: "feed-post-card__action-icon" %>
+                <span><%= repost_count %></span>
+              </summary>
+
+              <div class="feed-post-card__repost-panel">
+                <div class="feed-post-card__repost-options" aria-label="Repost options">
+                  <%= button_to post_repost_path(repost_target),
+                        class: "feed-post-card__repost-option",
+                        form: { class: "feed-post-card__repost-form feed-post-card__repost-form--plain" } do %>
+                    <%= inline_svg_tag "icons/repost.svg", class: "feed-post-card__repost-option-icon" %>
+                    <span class="feed-post-card__repost-option-copy">
+                      <strong class="feed-post-card__repost-option-title">Repost</strong>
+                      <span class="feed-post-card__repost-option-text">Share this devlog to your feed.</span>
+                    </span>
+                  <% end %>
+                </div>
+
+                <%= form_with scope: :post_repost,
+                      url: post_repost_path(repost_target),
+                      class: "feed-post-card__repost-form",
+                      local: true do |form| %>
+                  <%= form.label :body, "Quote", class: "feed-post-card__repost-label" %>
+                  <%= form.text_area :body,
+                        class: "feed-post-card__repost-textarea",
+                        rows: 3,
+                        required: true,
+                        maxlength: Post::Devlog::BODY_MAX_LENGTH,
+                        placeholder: "Add a thought before reposting." %>
+                  <%= form.submit "Quote", class: "feed-post-card__repost-submit" %>
+                <% end %>
+              </div>
+            </details>
+          <% else %>
+            <span class="feed-post-card__action feed-post-card__action--disabled" aria-label="Sign in to repost">
+              <%= inline_svg_tag "icons/repost.svg", class: "feed-post-card__action-icon" %>
+              <span><%= repost_count %></span>
+            </span>
+          <% end %>
+        </div>
+      <% else %>
+        <span class="feed-post-card__action feed-post-card__action--disabled" aria-label="Only devlogs can be reposted">
+          <%= inline_svg_tag "icons/repost.svg", class: "feed-post-card__action-icon" %>
+          <span>0</span>
+        </span>
+      <% end %>
+    <% end %>
 
     <% if show_likes && likeable.present? %>
       <div class="feed-post-card__like">
@@ -91,4 +180,5 @@
       </button>
     <% end %>
   </footer>
+  <% end %>
 </article>
