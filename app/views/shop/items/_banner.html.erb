@@ -15,7 +15,7 @@
 
           <%= render ActionButtonComponent.new(
             text: "Order #{featured_item.name}",
-            href: "/shop/items/#{featured_item.id}",
+            href: shop_item_path(featured_item),
             size: :large,
             variant: :primary,
             data: { turbo_frame: "_top"}
