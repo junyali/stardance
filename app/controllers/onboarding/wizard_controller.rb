@@ -161,10 +161,12 @@ class Onboarding::WizardController < ApplicationController
       @peer_count = User.where("interests && ARRAY[?]::varchar[]", @interests)
                         .where.not(id: current_user.id)
                         .count
-      @beginner_peer_count = User.where("interests && ARRAY[?]::varchar[]", @interests)
-                                 .where(experience_level: "none")
-                                 .where.not(id: current_user.id)
-                                 .count
+      if current_user.experience_level == "none"
+        @beginner_peer_count = User.where("interests && ARRAY[?]::varchar[]", @interests)
+                                   .where(experience_level: "none")
+                                   .where.not(id: current_user.id)
+                                   .count
+      end
       @featured_projects = Onboarding::FeaturedProjects.for_interests(@interests)
     end
   end
