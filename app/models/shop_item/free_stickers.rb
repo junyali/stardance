@@ -85,7 +85,7 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class ShopItem::FreeStickers < ShopItem
-  QUEUE_ID = "stardance-tutorial-stickers"
+  QUEUE_ID = "stardance-free-stickers"
 
   def fulfill!(shop_order)
     email   = shop_order.user&.email
