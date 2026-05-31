@@ -427,7 +427,8 @@ Rails.application.routes.draw do
   get "og/:page", to: "og_images#show", as: :og_image, defaults: { format: :png }
   # Landing
   root "landing#index"
-  # get "marketing", to: "landing#marketing"
+  get "landing/signup_count", to: "landing#signup_count", as: :landing_signup_count
+  get "landing/rsvp_count", to: "landing#rsvp_count", as: :landing_rsvp_count
 
   # RSVPs
   resources :rsvps, only: [ :create ] do
@@ -471,8 +472,6 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Test error page for Sentry
-  get "test_error" => "debug#error" unless Rails.env.production?
 
   # Letter opener web for development email preview
   if Rails.env.development?
@@ -677,6 +676,7 @@ Rails.application.routes.draw do
       # Mission::ShopUnlock model namespace. `controller:` is set explicitly
       # because `scope module: :missions` doesn't reliably propagate inside
       # a parent `resources do ... end` block.
+      resource  :language_rename, only: [ :create, :destroy ],         controller: "missions/language_renames"
       resource  :guide_paste,    only: [ :create ],                  controller: "missions/guide_pastes"
       resource  :guide_preview,  only: [ :create ],                  controller: "missions/guide_previews"
       resources :memberships,    only: [ :create, :update, :destroy ], controller: "missions/memberships"

@@ -191,6 +191,8 @@ class User < ApplicationRecord
   include User::Preferences
   include User::UsernameBloomSync
 
+  after_create_commit :increment_signup_counter, if: -> { Flipper.enabled?(:new_onboarding) }
+
   KERBAL_FIRST_NAMES = %w[
     Jebediah Bill Bob Valentina Lodwig Shepard Gus Wernher Gene
     Mortimer Linus Genekin Bobnik Billard Valentik Aldler Orlas
@@ -227,6 +229,10 @@ class User < ApplicationRecord
   end
 
   private
+
+  def increment_signup_counter
+    Rails.cache.increment("landing/signup_count")
+  end
 
   def enqueue_geocode_job
     UserGeocodeJob.perform_later(id) if ip_address.present?
