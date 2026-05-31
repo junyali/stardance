@@ -201,7 +201,7 @@
 
         <div class="feed-post-card__menu" data-post-menu-target="menu" hidden>
           <% if can_edit? && edit_url.present? %>
-            <span class="feed-post-card__menu-item feed-post-card__menu-item--disabled" title="Coming soon">Edit</span>
+            <%= link_to "Edit", edit_url, class: "feed-post-card__menu-item" %>
           <% end %>
 
           <% if can_delete? && delete_url.present? %>
