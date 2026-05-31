@@ -1552,6 +1552,18 @@ turbo-frame#project_hero {
   }
 }
 
+// Override feed-composer styles for ship modal
+.ship-modal {
+  .feed-composer__attach {
+    margin: 0;
+    border-color: var(--color-space-text-muted);
+  }
+
+  .feed-composer__grid {
+    padding-left: 0;
+  }
+}
+
 .project-show__hackatime-picker {
   position: relative;
   display: flex;

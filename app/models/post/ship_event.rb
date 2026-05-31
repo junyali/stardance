@@ -46,6 +46,8 @@ class Post::ShipEvent < ApplicationRecord
   VOTE_COST_PER_SHIP = 15
   BODY_MAX_LENGTH = Post::Devlog::BODY_MAX_LENGTH
   REVIEW_INSTRUCTIONS_MAX_LENGTH = 2_000
+  MAX_ATTACHMENTS = 4
+  ACCEPTED_CONTENT_TYPES = Post::Devlog::ACCEPTED_CONTENT_TYPES
 
   has_one :project, through: :post
   has_many :project_memberships, through: :project, source: :memberships
@@ -62,6 +64,26 @@ class Post::ShipEvent < ApplicationRecord
                                inverse_of: :ship_event,
                                dependent: :destroy
 
+  has_many_attached :attachments do |attachable|
+    attachable.variant :large,
+                       resize_to_limit: [ 1600, 900 ],
+                       format: :webp,
+                       preprocessed: true,
+                       saver: { strip: true, quality: 75 }
+
+    attachable.variant :medium,
+                       resize_to_limit: [ 800, 800 ],
+                       format: :webp,
+                       preprocessed: false,
+                       saver: { strip: true, quality: 75 }
+
+    attachable.variant :thumb,
+                       resize_to_limit: [ 400, 400 ],
+                       format: :webp,
+                       preprocessed: false,
+                       saver: { strip: true, quality: 75 }
+  end
+
   after_update :sync_mission_submission_status, if: :saved_change_to_certification_status?
 
   scope :current_voting_scale, -> { where(voting_scale_version: CURRENT_VOTING_SCALE_VERSION) }
@@ -69,6 +91,11 @@ class Post::ShipEvent < ApplicationRecord
 
   after_commit :decrement_user_vote_balance, on: :create
 
+  validates :attachments,
+            content_type: { in: ACCEPTED_CONTENT_TYPES, spoofing_protection: true },
+            size: { less_than: 50.megabytes, message: "is too large (max 50 MB)" },
+            processable_file: true
+  validate :at_most_max_attachments
   validates :body, presence: { message: "Update message can't be blank" }
   validates :body, length: { maximum: BODY_MAX_LENGTH }, on: :create
   validates :review_instructions, length: { maximum: REVIEW_INSTRUCTIONS_MAX_LENGTH }, allow_blank: true
@@ -125,6 +152,12 @@ class Post::ShipEvent < ApplicationRecord
   end
 
   private
+
+  def at_most_max_attachments
+    if attachments.size > MAX_ATTACHMENTS
+      errors.add(:attachments, "can't exceed #{MAX_ATTACHMENTS} files")
+    end
+  end
 
   def project_can_be_shipped
     return unless project

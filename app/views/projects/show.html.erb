@@ -417,48 +417,21 @@
               <% end %>
             <% end %>
           <% end %>
-          <% if @project.shippable? %>
-            <% if unposted_seconds >= 15 * 60 %>
-              <%= render ActionButtonComponent.new(
-                    text: "Ship your project!",
-                    variant: :primary,
-                    type: :button,
-                    icon: "icons/rocket.png",
-                    onclick: "document.getElementById('ship-warning-modal-' + #{@project.id.to_json}).showModal()"
-                  ) %>
-            <% else %>
-              <%= render ActionButtonComponent.new(
-                    text: "Ship your project!",
-                    variant: :primary,
-                    type: :button,
-                    icon: "icons/rocket.png",
-                    onclick: "document.getElementById('ship-video-modal-' + #{@project.id.to_json}).showModal()"
-                  ) %>
-            <% end %>
-          <% else %>
-            <%
-              ship_disabled_message =
-                if !@project.has_devlog_since_last_ship?
-                  "Post at least one devlog before shipping!"
-                elsif !@project.info_complete?
-                  "Complete your project info before shipping!"
-                else
-                  # Some other requirement (payout, vote balance, rejection,
-                  # tracked time) isn't met — tell them which one.
-                  @project.ship_blocker_message || "Finish the remaining requirements before shipping."
-                end
-            %>
+          <% if unposted_seconds >= 15 * 60 %>
             <%= render ActionButtonComponent.new(
                   text: "Ship your project!",
-                  variant: :secondary,
+                  variant: :primary,
                   type: :button,
                   icon: "icons/rocket.png",
-                  disabled: :soft,
-                  data: {
-                    controller: "tooltip",
-                    tooltip_message_value: ship_disabled_message,
-                    tooltip_position_value: "top"
-                  }
+                  onclick: "document.getElementById('ship-warning-modal-' + #{@project.id.to_json}).showModal()"
+                ) %>
+          <% else %>
+            <%= render ActionButtonComponent.new(
+                  text: "Ship your project!",
+                  variant: :primary,
+                  type: :button,
+                  icon: "icons/rocket.png",
+                  onclick: "document.getElementById('ship-video-modal-' + #{@project.id.to_json}).showModal()"
                 ) %>
           <% end %>
         </nav>
@@ -686,11 +659,14 @@
         an editable textarea, and "Ship!" submits straight to ships#create. %>
     <dialog id="ship-post-modal-<%= @project.id %>"
             class="ship-modal ship-modal--post"
-            data-controller="modal"
+            data-controller="modal composer"
+            data-composer-max-files-value="<%= Post::ShipEvent::MAX_ATTACHMENTS %>"
+            data-composer-simple-mode-value="true"
             aria-label="Ship your project">
       <div class="ship-modal__panel">
         <%= form_with url: project_ships_path(@project),
                       method: :post,
+                      multipart: true,
                       data: { turbo: false },
                       html: { class: "ship-modal__form" } do |form| %>
           <% ship_mission = @project.current_mission %>
@@ -735,10 +711,24 @@
                 <%= form.text_area :ship_update,
                       class: "ship-modal__textarea",
                       rows: 4,
-                      required: true,
                       maxlength: Post::ShipEvent::BODY_MAX_LENGTH,
                       placeholder: "What did you make? What was challenging? What are you proud of? What should people know so they can test your project?",
                       aria: { label: "Ship update" } %>
+
+                <div class="feed-composer__attach-wrap feed-composer__attach-wrap--expanded" data-composer-target="attachWrap">
+                  <label class="feed-composer__attach">
+                    <%= inline_svg_tag "icons/paper.svg", class: "feed-composer__attach-icon" %>
+                    <span class="feed-composer__attach-text">Add a screenshot of your project in action!</span>
+                    <%= file_field_tag "ship_event[attachments][]",
+                          multiple: true,
+                          accept: Post::ShipEvent::ACCEPTED_CONTENT_TYPES.join(","),
+                          class: "feed-composer__file-input",
+                          required: true,
+                          data: { composer_target: "fileInput", action: "change->composer#selectFiles" } %>
+                  </label>
+                </div>
+
+                <div class="feed-composer__grid" data-composer-target="grid" data-count="0" hidden></div>
 
                 <ul class="project-show__latest-ship-stats" aria-label="Project totals">
                   <li class="profile-project-card__meta-item">
