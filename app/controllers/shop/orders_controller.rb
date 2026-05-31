@@ -175,6 +175,10 @@ class Shop::OrdersController < Shop::BaseController
     authorize :shop
 
     @order = current_user.shop_orders.find(params[:id])
+    if @order.shop_item.is_a?(ShopItem::FreeStickers)
+      redirect_to shop_orders_path, alert: "Free sticker orders cannot be cancelled."
+      return
+    end
     if @order.aasm_state == "fulfilled"
       redirect_to shop_orders_path, alert: "You cannot cancel an already fulfilled order."
       return

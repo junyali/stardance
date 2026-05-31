@@ -137,6 +137,7 @@ class ShopOrder < ApplicationRecord
   end
 
   def cancel_by_user
+    return { success: false, error: "Free sticker orders cannot be cancelled" } if shop_item.is_a?(ShopItem::FreeStickers)
     return { success: false, error: "Your order can not be canceled" } unless may_refund?
 
     with_lock do
