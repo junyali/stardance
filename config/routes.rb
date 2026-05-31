@@ -488,6 +488,9 @@ Rails.application.routes.draw do
 
   # Home
   get "home", to: "home#index"
+  namespace :home do
+    resource :feed, only: [ :show ]
+  end
 
   # Leaderboard
   get "leaderboard", to: "leaderboard#index"

@@ -57,6 +57,14 @@
   </head>
 
   <body class="<%= current_user.present? && !@hide_sidebar ? 'signed-in' : '' %> <%= @body_class %> <%= 'streamer-mode' if session[:streamer_mode] %>">
+    <% unless controller_name == "landing" %>
+      <div class="app-loading" aria-hidden="true">
+        <div class="app-loading__inner">
+          <%= image_tag "landing/header/stardance-logo.png", alt: "", class: "app-loading__logo" %>
+          <span class="app-loading__spinner"></span>
+        </div>
+      </div>
+    <% end %>
     <div class="top-banners">
       <% if in_beta? %>
         <div class="top-banner top-banner--beta">
