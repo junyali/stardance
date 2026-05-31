@@ -555,18 +555,25 @@
     <% if @show_project_onboarding %>
       <section class="project-show__onboarding" aria-labelledby="project-show-onboarding-title">
         <header class="project-show__onboarding-header">
-          <h2 class="project-show__onboarding-header-title" id="project-show-onboarding-title">Welcome to your new project!</h2>
           <% if !@hackatime_linked %>
+            <h2 class="project-show__onboarding-header-title" id="project-show-onboarding-title">Welcome to your new project!</h2>
             <p class="project-show__onboarding-header-body">
               Link Hackatime to start tracking your time. Once you do and post a devlog, you'll unlock free stickers in the shop!
             </p>
-          <% elsif current_user && !current_user.shop_tutorial_completed? %>
+          <% elsif @project.hackatime_keys.present? %>
+            <h2 class="project-show__onboarding-header-title" id="project-show-onboarding-title">You're all set — go code!</h2>
             <p class="project-show__onboarding-header-body">
-              Hackatime is linked! Post a devlog and head to the <a href="/shop" class="project-show__onboarding-header-link">shop tab</a> to claim your free stickers.
+              Once you have 15 minutes of coding time, come back and write your first devlog!
+            </p>
+          <% elsif @all_hackatime_projects.present? %>
+            <h2 class="project-show__onboarding-header-title" id="project-show-onboarding-title">You're all set — go code!</h2>
+            <p class="project-show__onboarding-header-body">
+              We found Hackatime projects on your account — <%= link_to "edit your project", project_path(@project, editing: true), class: "project-show__onboarding-header-link", data: { turbo_frame: "project_hero" } %> to link one. Once you have 15 minutes of coding time, write your first devlog!
             </p>
           <% else %>
+            <h2 class="project-show__onboarding-header-title" id="project-show-onboarding-title">You're all set — go code!</h2>
             <p class="project-show__onboarding-header-body">
-              Your devlogs will appear here. Start coding and post your first devlog!
+              Start coding with Hackatime running. Once you have 15 minutes, <%= link_to "edit your project", project_path(@project, editing: true), class: "project-show__onboarding-header-link", data: { turbo_frame: "project_hero" } %> to link your Hackatime project, then write your first devlog!
             </p>
           <% end %>
         </header>
