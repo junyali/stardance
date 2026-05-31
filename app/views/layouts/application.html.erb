@@ -57,7 +57,7 @@
   </head>
 
   <body class="<%= current_user.present? && !@hide_sidebar ? 'signed-in' : '' %> <%= @body_class %> <%= 'streamer-mode' if session[:streamer_mode] %>">
-    <% unless controller_name == "landing" %>
+    <% if @show_boot_splash %>
       <div class="app-loading" aria-hidden="true">
         <div class="app-loading__inner">
           <%= image_tag "landing/header/stardance-logo.png", alt: "", class: "app-loading__logo" %>

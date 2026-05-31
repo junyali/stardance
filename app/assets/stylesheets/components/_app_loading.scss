@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   background: var(--color-set-1-bg);
-  animation: app-loading-out 200ms ease 500ms forwards;
+  animation: app-loading-out 200ms ease 300ms forwards;
 
   &__inner {
     display: flex;
