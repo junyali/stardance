@@ -7,6 +7,6 @@ class CreateShopWishlists < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :shop_wishlists, [:user_id, :shop_item_id], unique: true
+    add_index :shop_wishlists, [ :user_id, :shop_item_id ], unique: true
   end
 end
