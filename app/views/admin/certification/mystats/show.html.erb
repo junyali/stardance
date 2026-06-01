@@ -39,7 +39,7 @@
             <label for="payout-amount" class="reviewer-stats__label">Request Payout</label>
             <div class="reviewer-stats__form-row">
               <%= number_field_tag :amount, @unclaimed, min: 1, max: @unclaimed,
-                    id: "payout-amount", class: "reviewer-stats__input", required: true %>
+                    id: "payout-amount", class: "reviewer-stats__input", required: true, autocomplete: "off" %>
               <span class="reviewer-stats__input-hint">of <%= @unclaimed %> ✦ available</span>
             </div>
             <button type="submit" class="action-btn action-btn--primary"
