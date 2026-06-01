@@ -49,6 +49,7 @@ class Rsvp < ApplicationRecord
   before_validation :downcase_email
   after_commit :deliver_signup_confirmation, on: :create
   after_commit :enqueue_geocode_job, on: :create
+  after_commit :increment_signup_counter, on: :create
 
   class << self
     def ambassador_referrals
@@ -99,4 +100,7 @@ class Rsvp < ApplicationRecord
 
   def enqueue_geocode_job = RsvpGeocodeJob.perform_later(id)
 
+  def increment_signup_counter
+    Rails.cache.increment("landing/signup_count")
+  end
 end
