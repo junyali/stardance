@@ -55,6 +55,21 @@
               <span><%= @payout_request.adjust_reason %></span>
             </div>
           <% end %>
+        <% elsif @payout_request.rejected? %>
+          <div class="sw-payouts__detail-row">
+            <span class="sw-payouts__label">Rejected By</span>
+            <span><%= @payout_request.admin&.display_name %></span>
+          </div>
+          <div class="sw-payouts__detail-row">
+            <span class="sw-payouts__label">Rejected At</span>
+            <span><%= @payout_request.updated_at.strftime('%b %d, %Y at %H:%M') %></span>
+          </div>
+          <% if @payout_request.adjust_reason.present? %>
+            <div class="sw-payouts__detail-row">
+              <span class="sw-payouts__label">Rejection Reason</span>
+              <span><%= @payout_request.adjust_reason %></span>
+            </div>
+          <% end %>
         <% end %>
       </div>
 
@@ -91,10 +106,25 @@
           <% end %>
 
           <div class="sw-payouts__reject-section">
-            <%= button_to "Reject", reject_admin_certification_payout_path(@payout_request),
-                  method: :post,
-                  class: "action-btn action-btn--small action-btn--destructive",
-                  data: { confirm: "Reject this payout request?" } %>
+            <h2>Reject Request</h2>
+            <%= form_with url: reject_admin_certification_payout_path(@payout_request),
+                  method: :post, class: "sw-payouts__pay-form" do %>
+              <div class="sw-payouts__form-group">
+                <label for="reject-reason" class="sw-payouts__label">
+                  Reason for rejection (required)
+                </label>
+                <%= text_area_tag :reject_reason, nil,
+                      id: "reject-reason",
+                      rows: 2,
+                      required: true,
+                      placeholder: "e.g. invalid review submissions",
+                      class: "sw-payouts__input sw-payouts__input--textarea" %>
+              </div>
+              <button type="submit" class="action-btn action-btn--destructive"
+                      data-confirm="Reject this payout request?">
+                Reject Request
+              </button>
+            <% end %>
           </div>
         </div>
       <% end %>

@@ -75,6 +75,16 @@ class Admin::Certification::PayoutsController < Admin::Certification::Applicatio
       return
     end
 
+    reject_reason = params[:reject_reason].presence
+
+    if reject_reason.blank?
+      redirect_to admin_certification_payout_path(@payout_request),
+        alert: "Rejection reason is required when rejecting a payout request."
+      return
+    end
+
+    @payout_request.admin = current_user
+    @payout_request.adjust_reason = reject_reason
     @payout_request.reject!
 
     ::PaperTrail::Version.create!(
@@ -82,7 +92,11 @@ class Admin::Certification::PayoutsController < Admin::Certification::Applicatio
       item_id: @payout_request.id,
       event: "rejected",
       whodunnit: current_user.id,
-      object_changes: { aasm_state: %w[pending rejected] }.to_json
+      object_changes: {
+        aasm_state: %w[pending rejected],
+        admin_id: [ nil, current_user.id ],
+        adjust_reason: [ nil, reject_reason ]
+      }.to_json
     )
 
     redirect_to admin_certification_payouts_path,
