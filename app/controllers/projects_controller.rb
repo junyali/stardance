@@ -446,8 +446,6 @@ class ProjectsController < ApplicationController
 
   def validate_url_not_dead(attribute, name)
     require "uri"
-    require "faraday"
-    require "faraday/follow_redirects"
 
     return unless @project.send(attribute).present?
 
@@ -456,24 +454,20 @@ class ProjectsController < ApplicationController
     if ALLOWLISTED_DOMAINS.any? { |domain| uri.host&.end_with?(domain) }
       return
     end
-    unless SafeUrl.safe_to_probe?(uri.to_s)
-      @project.errors.add(attribute, "#{name} does not point to a valid public URL")
-      return
-    end
-    conn = Faraday.new(
-      url: uri.to_s,
-      headers: { "User-Agent" => "Stardance project validator (https://stardance.hackclub.com/)" }
-    ) do |faraday|
-      faraday.response :follow_redirects, max_redirects: 3
-      faraday.adapter Faraday.default_adapter
-    end
-    response = conn.get() do |req|
-      req.options.timeout = 5
-      req.options.open_timeout = 5
-    end
 
-    unless (200..299).cover?(response.status)
-      @project.errors.add(attribute, "Your #{name} needs to return a 200 status. I got #{response.status}, is your code/website set to public!?!?")
+    # Pinned probe: resolves+verifies the host and connects to that exact IP, so
+    # the address we vetted is the one we hit even across redirects. This is the
+    # SSRF-safe path the model's url_reachable? already uses — keep both on it.
+    response = SafeUrl.safe_get(
+      uri.to_s,
+      headers: { "User-Agent" => "Stardance project validator (https://stardance.hackclub.com/)" },
+      open_timeout: 5,
+      read_timeout: 5
+    )
+    status = response.code.to_i
+
+    unless (200..299).cover?(status)
+      @project.errors.add(attribute, "Your #{name} needs to return a 200 status. I got #{status}, is your code/website set to public!?!?")
     end
 
 
@@ -519,8 +513,12 @@ class ProjectsController < ApplicationController
 
   rescue URI::InvalidURIError
     @project.errors.add(attribute, "#{name} is not a valid URL")
-  rescue Faraday::ConnectionFailed => e
-    Rails.logger.warn("URL validation failed for #{attribute}: #{e.message}")
+  rescue SafeUrl::Error => e
+    # Host failed SSRF verification (non-public IP, unresolvable, bad scheme).
+    Rails.logger.warn("URL validation rejected #{attribute}: #{e.message}")
+    @project.errors.add(attribute, "#{name} does not point to a valid public URL")
+  rescue SocketError, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Net::OpenTimeout, Net::ReadTimeout, OpenSSL::SSL::SSLError => e
+    Rails.logger.warn("URL validation failed for #{attribute}: #{e.class}: #{e.message}")
     @project.errors.add(attribute, "#{name} could not be reached. Please make sure the URL is valid and publicly accessible.")
   rescue StandardError => e
     Rails.logger.warn("URL validation error for #{attribute}: #{e.class}: #{e.message}")
