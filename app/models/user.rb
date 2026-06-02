@@ -61,7 +61,7 @@ class User < ApplicationRecord
   include SemanticSearchIndexable
   include Gorse::SyncableUser
 
-  has_paper_trail ignore: [ :votes_count, :updated_at, :shop_region, :ip_address, :user_agent, :session_token ], on: [ :update, :destroy ]
+  has_paper_trail ignore: [ :votes_count, :updated_at, :shop_region, :ip_address, :user_agent ], on: [ :update, :destroy ]
   semantic_search_indexable type: "user"
 
   has_many :identities, class_name: "User::Identity", dependent: :destroy
@@ -155,8 +155,6 @@ class User < ApplicationRecord
   }.freeze
   INTERESTS_UNKNOWN = "dont_know".freeze
 
-  before_create :generate_session_token
-
   validate :interests_must_be_allowed
   after_commit :enqueue_geocode_job, on: :create
 
@@ -236,20 +234,7 @@ class User < ApplicationRecord
       .first
   end
 
-  def rotate_session_token!
-    generate_session_token
-    update_column(:session_token, session_token)
-    session_token
-  end
-
   private
-
-  def generate_session_token
-    loop do
-      self.session_token = SecureRandom.urlsafe_base64(32)
-      break unless User.exists?(session_token: session_token)
-    end
-  end
 
   def increment_signup_counter
     Rails.cache.increment("landing/signup_count", 1, expires_in: 30.seconds)

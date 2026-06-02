@@ -67,8 +67,7 @@ class ApplicationController < ActionController::Base
       scope = scope.eager_load(*Array(preloads)) if preloads.present?
       user = scope.to_a.first
 
-      if user && user.session_token.present? && !session[:impersonator_user_id] &&
-         !ActiveSupport::SecurityUtils.secure_compare(session[:session_token].to_s, user.session_token.to_s)
+      if user && session[:auth_level] == "guest" && user.hca_linked?
         reset_session
         return @current_user = nil
       end
@@ -102,7 +101,7 @@ class ApplicationController < ActionController::Base
 
   def sign_in_user(user)
     session[:user_id] = user.id
-    session[:session_token] = user.session_token
+    session[:auth_level] = user.hca_linked? ? "hca" : "guest"
   end
 
   # https://stackoverflow.com/questions/70960161/ruby-on-rails-back-button-that-will-take-you-back-to-the-previous-page
