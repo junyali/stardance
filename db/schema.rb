@@ -634,6 +634,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_03_142640) do
     t.datetime "marked_fire_at"
     t.bigint "marked_fire_by_id"
     t.integer "memberships_count", default: 0, null: false
+    t.datetime "nominated_fire_at"
+    t.bigint "nominated_fire_by_id"
     t.string "project_categories", default: [], array: true
     t.string "project_type"
     t.text "readme_url"
@@ -647,6 +649,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_03_142640) do
     t.datetime "updated_at", null: false
     t.index ["deleted_at"], name: "index_projects_on_deleted_at"
     t.index ["marked_fire_by_id"], name: "index_projects_on_marked_fire_by_id"
+    t.index ["nominated_fire_by_id"], name: "index_projects_on_nominated_fire_by_id"
   end
 
   create_table "report_review_tokens", force: :cascade do |t|
@@ -1238,6 +1241,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_03_142640) do
   add_foreign_key "project_skips", "projects"
   add_foreign_key "project_skips", "users"
   add_foreign_key "projects", "users", column: "marked_fire_by_id"
+  add_foreign_key "projects", "users", column: "nominated_fire_by_id"
   add_foreign_key "report_review_tokens", "project_reports", column: "report_id"
   add_foreign_key "rsvp_games", "rsvps"
   add_foreign_key "rsvp_replies", "rsvps"

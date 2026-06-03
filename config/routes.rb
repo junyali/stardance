@@ -744,6 +744,7 @@ Rails.application.routes.draw do
     resource :ships, only: [ :create ], module: :projects
     resource :mission, only: [ :create, :destroy ], module: :projects, controller: "missions"
     resource :magic, only: [ :create, :destroy ], module: :projects, controller: "magic"
+    resource :fire_nomination, only: [ :create, :destroy ], module: :projects
     resources :mission_section_completions,
               only: [ :create, :destroy ],
               module: :projects,

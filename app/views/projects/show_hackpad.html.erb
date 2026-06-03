@@ -343,9 +343,7 @@
                 <strong><%= follower_count %></strong> <%= "follower".pluralize(follower_count) %>
               <% end %>
               <div class="project-show__panel-actions">
-                <% if @project.fire? %>
-                  <span class="project-show__badge project-show__badge--fire">⭐ Super Star Project</span>
-                <% end %>
+                <%= render "projects/fire_controls", project: @project %>
 
                 <% if can_edit_project %>
                   <%= link_to "Edit project", project_path(@project, editing: true),

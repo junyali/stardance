@@ -693,6 +693,20 @@ turbo-frame#project_hero {
     background: var(--gradient-extra-highlight) center / cover no-repeat;
     color: var(--color-set-1-bg);
   }
+
+  // A pending nomination is reviewer-only and not yet the real thing, so it
+  // gets a subdued tint rather than the reserved highlight gradient above.
+  &--nominated {
+    background: color-mix(in srgb, var(--color-brand-yellow) 16%, transparent);
+    color: var(--color-brand-yellow);
+  }
+}
+
+// The fire controls use button_to (Turbo Drive is off app-wide, so these must
+// be real form submits). Collapse the wrapping form so each button still lines
+// up as a flex sibling of the surrounding pills.
+.project-show__pill-form {
+  display: contents;
 }
 
 // Action row sits between the header and the latest-ship card.
