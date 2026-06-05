@@ -342,7 +342,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_04_201158) do
     t.bigint "mission_id", null: false
     t.integer "position", default: 0, null: false
     t.datetime "updated_at", null: false
-    t.index "mission_id, lower((language)::text)", name: "index_mission_guide_variants_unique_language", unique: true
+    t.index ["mission_id", "language"], name: "index_mission_guide_variants_unique_language", unique: true
     t.index ["mission_id"], name: "index_mission_guide_variants_on_mission_id"
   end
 
@@ -400,7 +400,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_04_201158) do
     t.string "language", null: false
     t.bigint "mission_step_id", null: false
     t.datetime "updated_at", null: false
-    t.index "mission_step_id, lower((language)::text)", name: "index_mission_step_bodies_unique_language", unique: true
+    t.index ["mission_step_id", "language"], name: "index_mission_step_bodies_unique_language", unique: true
     t.index ["mission_step_id"], name: "index_mission_step_bodies_on_mission_step_id"
   end
 
@@ -466,32 +466,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_04_201158) do
     t.index ["enabled"], name: "index_missions_on_enabled"
     t.index ["featured_at"], name: "index_missions_on_featured_at"
     t.index ["slug"], name: "index_missions_on_slug", unique: true
-  end
-
-  create_table "notifications", force: :cascade do |t|
-    t.bigint "actor_id"
-    t.datetime "created_at", null: false
-    t.datetime "email_delivered_at"
-    t.integer "group_count", default: 1, null: false
-    t.string "group_key"
-    t.jsonb "params", default: {}, null: false
-    t.integer "priority", default: 0, null: false
-    t.datetime "read_at"
-    t.bigint "recipient_id", null: false
-    t.bigint "record_id"
-    t.string "record_type"
-    t.datetime "seen_at"
-    t.datetime "slack_enqueued_at"
-    t.string "type", null: false
-    t.datetime "updated_at", null: false
-    t.index ["actor_id"], name: "index_notifications_on_actor_id"
-    t.index ["recipient_id", "created_at"], name: "index_notifications_on_recipient_id_and_created_at"
-    t.index ["recipient_id", "group_key", "read_at"], name: "index_notifications_on_recipient_id_and_group_key_and_read_at", where: "(group_key IS NOT NULL)"
-    t.index ["recipient_id", "seen_at"], name: "index_notifications_on_recipient_id_and_seen_at"
-    t.index ["recipient_id", "type", "group_key"], name: "index_notifications_unique_unread_aggregate", unique: true, where: "((read_at IS NULL) AND (group_key IS NOT NULL))"
-    t.index ["recipient_id"], name: "index_notifications_on_recipient_id"
-    t.index ["record_type", "record_id"], name: "index_notifications_on_record_type_and_record_id"
-    t.index ["type", "created_at"], name: "index_notifications_on_type_and_created_at"
   end
 
   create_table "post_devlogs", force: :cascade do |t|
@@ -1140,17 +1114,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_04_201158) do
     t.index ["user_id"], name: "index_user_identities_on_user_id"
   end
 
-  create_table "user_notification_preferences", force: :cascade do |t|
-    t.string "category", null: false
-    t.datetime "created_at", null: false
-    t.boolean "email_enabled"
-    t.boolean "slack_enabled"
-    t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
-    t.index ["user_id", "category"], name: "index_user_notification_preferences_on_user_id_and_category", unique: true
-    t.index ["user_id"], name: "index_user_notification_preferences_on_user_id"
-  end
-
   create_table "user_preferences", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.boolean "leaderboard_optin", default: false, null: false
@@ -1225,7 +1188,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_04_201158) do
     t.index "lower((display_name)::text)", name: "index_users_on_lower_display_name_unique", unique: true, where: "((display_name IS NOT NULL) AND ((display_name)::text <> ''::text))"
     t.index "lower((email)::text)", name: "index_users_on_lower_email_unique", unique: true, where: "((email IS NOT NULL) AND ((email)::text <> ''::text))"
     t.index ["email"], name: "index_users_on_email"
-    t.index ["guest_email"], name: "index_users_on_guest_email"
     t.index ["onboarded_at"], name: "index_users_on_onboarded_at"
     t.index ["session_token"], name: "index_users_on_session_token", unique: true
     t.index ["slack_id"], name: "index_users_on_slack_id", unique: true
@@ -1327,8 +1289,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_04_201158) do
   add_foreign_key "mission_submissions", "post_ship_events", column: "ship_event_id"
   add_foreign_key "mission_submissions", "shop_orders"
   add_foreign_key "mission_submissions", "users", column: "reviewed_by_id"
-  add_foreign_key "notifications", "users", column: "actor_id", on_delete: :nullify
-  add_foreign_key "notifications", "users", column: "recipient_id", on_delete: :cascade
   add_foreign_key "post_reposts", "posts", column: "original_post_id"
   add_foreign_key "post_reposts", "users"
   add_foreign_key "posts", "projects"
@@ -1388,7 +1348,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_04_201158) do
   add_foreign_key "user_hackatime_projects", "projects"
   add_foreign_key "user_hackatime_projects", "users"
   add_foreign_key "user_identities", "users"
-  add_foreign_key "user_notification_preferences", "users", on_delete: :cascade
   add_foreign_key "user_preferences", "users"
   add_foreign_key "user_vote_verdicts", "users"
   add_foreign_key "vote_assignments", "post_ship_events", column: "ship_event_id"
