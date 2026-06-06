@@ -594,6 +594,7 @@ Rails.application.routes.draw do
         resource  :verification,        only: [ :create ]
         resource  :vote_balance,        only: [ :update ]
         resource  :ysws_override,       only: [ :update ]
+        resources :identities,          only: [ :destroy ]
         resources :votes,               only: [ :index ]
       end
     end

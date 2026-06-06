@@ -385,7 +385,7 @@ GEM
     multi_xml (0.9.1)
       bigdecimal (>= 3.1, < 5)
     multipart-post (2.4.1)
-    neighbor (1.1.1)
+    neighbor (1.2.0)
       activerecord (>= 7.2)
     net-http (0.9.1)
       uri (>= 0.11.1)
@@ -752,7 +752,7 @@ GEM
       activemodel (>= 3.0.0)
       public_suffix
     version_gem (1.1.10)
-    view_component (4.11.0)
+    view_component (4.12.0)
       actionview (>= 7.1.0)
       activesupport (>= 7.1.0)
       concurrent-ruby (~> 1)
@@ -871,4 +871,4 @@ DEPENDENCIES
   with_advisory_lock
 
 BUNDLED WITH
-  4.0.4
+  4.0.13

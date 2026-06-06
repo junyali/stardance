@@ -1,4 +1,5 @@
-source "https://rubygems.org"
+# https://blog.rubygems.org/2026/06/03/cooldown-let-new-gems-be-vetted.html
+source "https://rubygems.org", cooldown: 7
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.1.3"
