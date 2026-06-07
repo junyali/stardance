@@ -127,9 +127,15 @@ Scopes tell Slack what your bot is allowed to do.
 3. Click **Save**.
 
 :::callout type="info"
-**Why `/mybot-` and not just `/ping`?** The Hack Club Slack workspace has many bots installed, and generic command names like `/ping` collide with other bots. Prefix yours with a short tag of your bot's name (here `mybot` for "My Bot") so commands look like `/mybot-ping`, `/mybot-hello`, etc.
+**Why `/mybot-` and not just `/ping`?** The Hack Club Slack workspace has many bots installed, and generic command names like `/ping` collide with other bots (see below for further explanation). Prefix yours with a short tag of your bot's name (here `mybot` for "My Bot") so commands look like `/mybot-ping`, `/mybot-hello`, etc.
 
 Keep a note of the *exact* command name — it's case-sensitive and you'll reference it in your code.
+:::
+
+:::callout type="warning"
+**Use a unique command name for your bot!**
+
+If you and another person's bot registers the same command name like `/ping`, they will conflict and the latest bot installed using that command name will kick off any other bots using it, and the next that command is run it will run the action set up by the latest bot. If you encounter issues with a command not running an expected action and your command name is one that's quite common, try renaming the command to something less common like the above!
 :::
 
 ### Where to find tokens later
